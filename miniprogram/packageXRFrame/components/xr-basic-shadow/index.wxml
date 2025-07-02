@@ -1,3 +1,0 @@
-<xr-scene id="xr-scene" bind:ready="handleReady" bind:tick="handleTick">
-  <xr-shadow id="shadow-root"></xr-shadow>
-</xr-scene>

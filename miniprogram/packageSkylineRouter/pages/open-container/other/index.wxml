@@ -1,3 +1,0 @@
-<!--pages/other/index.wxml-->
-<mp-navigation-bar title="other" back="{{true}}"></mp-navigation-bar>
-<text>pages/other/index.wxml</text>

@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "云函数调试",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/cloudfunctions/${input:cloudFunction}/index.js",
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "Jest 测试",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--runInBand"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true
+    }
+  ],
+  "inputs": [
+    {
+      "id": "cloudFunction",
+      "type": "promptString",
+      "description": "输入要调试的云函数名称"
+    }
+  ]
+}

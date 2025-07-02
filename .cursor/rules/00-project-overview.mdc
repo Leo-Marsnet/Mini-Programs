@@ -1,0 +1,109 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# 00. 项目概述
+
+这是一个基于**微信小程序原生框架**的高级项目模版，采用**关注点分离**的双目录架构设计。
+
+该项目遵循微信小程序官方开发规范，并集成了现代化的开发工具链。
+
+## 🏗️ 双目录架构
+
+本项目采用**关注点分离**架构：
+- **主目录** (YOUR-PROJECT-NAME): Cursor开发环境、项目管理、测试
+- **小程序目录** (miniprogram/): 微信小程序源代码
+
+## 关键配置文件与入口
+
+*   **项目依赖与脚本**: @package.json
+*   **小程序全局配置**: @miniprogram/app.json
+*   **项目构建配置**: @project.config.json
+*   **ESLint配置**: @.eslintrc.js
+*   **应用主入口**: @miniprogram/app.js
+
+## 项目结构
+
+```
+YOUR-PROJECT-NAME/             # 主项目目录 (Cursor开发环境)
+├── .cursor/                   # Cursor配置和文档
+├── scripts/                   # 辅助脚本
+├── test/                      # 测试文件
+├── package.json               # 主项目依赖管理
+├── project.config.json        # Cursor开发环境配置
+├── README.md                  # 项目说明文档
+└── miniprogram/               # 小程序根目录 ⭐
+    ├── app.js                 # 小程序入口文件
+    ├── app.json               # 全局配置文件
+    ├── app.wxss               # 全局样式文件
+    ├── project.config.json    # 微信开发者工具配置
+    ├── sitemap.json           # 搜索配置
+    ├── pages/                 # 页面目录
+    │   └── index/             # 首页
+    │       ├── index.js       # 页面逻辑
+    │       ├── index.json     # 页面配置
+    │       ├── index.wxml     # 页面结构
+    │       └── index.wxss     # 页面样式
+    ├── components/            # 自定义组件
+    ├── utils/                 # 工具类
+    ├── config/                # 配置文件
+    ├── assets/                # 静态资源
+    │   ├── images/           # 图片资源
+    │   └── icons/            # 图标资源
+    └── cloud/functions/       # 云函数目录
+```
+
+## 核心技术栈
+
+- **框架**: 微信小程序原生框架
+- **语言**: JavaScript/TypeScript
+- **样式**: WXSS/Less
+- **云服务**: 微信云开发
+- **构建工具**: 微信开发者工具
+- **代码规范**: ESLint + Prettier
+
+## 开发工具分工
+
+### Cursor (主目录)
+- 代码编辑和项目管理
+- 运行测试和脚本
+- 版本控制操作
+- 文档编写
+
+### 微信开发者工具 (miniprogram目录)
+- 小程序调试和预览
+- 真机测试
+- 代码上传发布
+- 云函数部署
+
+## 核心开发要点
+
+### 数据绑定
+```javascript
+// page.js
+Page({
+  data: {
+    message: "Hello 小程序"
+  }
+})
+```
+
+```xml
+<!-- page.wxml -->
+<view>{{message}}</view>
+```
+
+### API调用
+```javascript
+wx.request({
+  url: 'https://api.example.com',
+  success: (res) => console.log(res.data)
+})
+```
+
+### 组件化开发
+- 自定义组件需在json中声明`"component": true`
+- 使用`Component()`构造器代替`Page()`
+- 通过`properties`接收外部数据
+- 通过`triggerEvent`向父组件传递事件

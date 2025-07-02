@@ -18,6 +18,6 @@ root-portal {
   background: rgba(51, 51, 51, 0.65);
   opacity: 1;
   transform: scale3d(1, 1, 1);
-  transition: all .2s ease-in;
+  transition: all 0.2s ease-in;
   pointer-events: auto;
 }

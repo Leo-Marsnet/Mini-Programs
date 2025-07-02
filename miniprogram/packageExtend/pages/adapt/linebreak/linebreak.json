@@ -1,8 +1,0 @@
-{
-  "usingComponents": {
-    "mp-col": "../../../components/col/index",
-    "mp-row": "../../../components/row/index"
-  },
-  "renderer": "webview",
-  "navigationBarTitleText": "换行排列"
-}

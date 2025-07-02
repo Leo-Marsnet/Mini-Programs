@@ -1,0 +1,161 @@
+# 微信小程序项目 - Cursor开发规则
+
+## ⚠️ 核心架构规则（必须严格遵守）
+
+### 🏗️ 双目录架构
+本项目采用**关注点分离**架构：
+- **主目录** (YOUR-PROJECT-NAME): Cursor开发环境、项目管理、测试
+- **小程序目录** (miniprogram/): 微信小程序源代码
+
+### 🎯 绝对规则：所有小程序开发都在 miniprogram/ 目录下
+
+当用户要求开发小程序功能时，**必须**在 `miniprogram/` 目录下操作：
+
+✅ **正确操作：**
+```
+miniprogram/pages/profile/profile.js        # 创建页面
+miniprogram/components/user-card/index.js   # 创建组件
+miniprogram/utils/helpers.js                # 创建工具函数
+miniprogram/config/env.js                   # 修改配置
+miniprogram/assets/images/icon.png          # 添加静态资源
+miniprogram/cloud/functions/login/index.js  # 云函数
+```
+
+❌ **禁止操作：**
+```
+pages/profile/profile.js        # ❌ 不要在主目录创建页面
+components/user-card/index.js   # ❌ 不要在主目录创建组件
+utils/helpers.js                # ❌ 不要在主目录创建工具函数
+```
+
+### 📝 文件创建前检查清单
+1. ✅ 路径以 `miniprogram/` 开头
+2. ✅ 符合微信小程序文件结构
+3. ✅ 页面已在 `miniprogram/app.json` 中注册
+4. ✅ 组件已正确引用
+
+## 🛠️ 微信小程序开发规范
+
+### 页面开发标准
+每个页面必须包含4个文件：
+```
+miniprogram/pages/example/
+├── example.js    # 页面逻辑
+├── example.json  # 页面配置
+├── example.wxml  # 页面结构
+└── example.wxss  # 页面样式
+```
+
+### 组件开发标准
+每个组件必须包含4个文件：
+```
+miniprogram/components/user-card/
+├── index.js    # 组件逻辑
+├── index.json  # 组件配置
+├── index.wxml  # 组件结构
+└── index.wxss  # 组件样式
+```
+
+### 代码风格要求
+- **命名约定**: 使用小驼峰命名法
+- **文件命名**: 使用kebab-case (短横线分隔)
+- **缩进**: 2个空格
+- **引号**: 单引号优先
+- **分号**: 语句结尾必须加分号
+
+### 小程序特有规范
+- 使用 `Page()` 构造页面
+- 使用 `Component()` 构造组件
+- 数据更新必须使用 `setData()`
+- 事件绑定使用 `bind:` 或 `catch:`
+- 样式单位优先使用 `rpx`
+
+## 📦 工具类使用指南
+
+项目内置工具类位于 `miniprogram/utils/`：
+- `request.js` - 网络请求封装
+- `storage.js` - 本地存储管理
+- `wx-utils.js` - 微信API封装
+- `format.js` - 数据格式化
+- `store.js` - 全局状态管理
+- `errorHandler.js` - 错误处理
+
+## 🔧 开发工作流
+
+### 创建新页面
+1. 在 `miniprogram/pages/` 下创建页面目录
+2. 创建4个必需文件 (.js/.json/.wxml/.wxss)
+3. 在 `miniprogram/app.json` 中注册页面路径
+4. 编写页面逻辑和模板
+
+### 创建新组件
+1. 在 `miniprogram/components/` 下创建组件目录
+2. 创建4个必需文件，index.json设置 `"component": true`
+3. 在需要使用的页面json中引入组件
+4. 在wxml中使用组件标签
+
+### 网络请求
+```javascript
+const { request } = require('../utils/request')
+
+// 使用封装的请求方法
+const data = await request.get('/api/users')
+const result = await request.post('/api/login', { username, password })
+```
+
+### 本地存储
+```javascript
+const storage = require('../utils/storage')
+
+// 基础存储
+storage.set('key', 'value')
+const value = storage.get('key')
+
+// 带过期时间的存储
+storage.setWithExpiry('key', data, 24 * 60 * 60 * 1000) // 24小时过期
+```
+
+## 🎨 UI开发规范
+
+### 样式组织
+- 全局样式：`miniprogram/app.wxss`
+- 页面样式：各页面的 `.wxss` 文件
+- 组件样式：各组件的 `.wxss` 文件
+
+### 响应式设计
+- 使用 `rpx` 单位适配不同屏幕
+- 合理使用 Flexbox 布局
+- 考虑安全区域适配
+
+### 微信设计规范
+- 遵循微信小程序设计指南
+- 使用微信提供的标准组件
+- 保持界面简洁直观
+
+## 📱 调试和测试
+
+### 开发环境
+- 用Cursor编辑代码（主目录）
+- 用微信开发者工具调试（miniprogram目录）
+- 两个工具分离使用，避免冲突
+
+### 测试要求
+- 功能测试：核心功能正确性
+- 兼容性测试：不同机型和版本
+- 性能测试：页面加载和响应速度
+
+## 🚀 性能优化
+
+### 代码层面
+- 避免频繁调用 `setData()`
+- 合理使用分包加载
+- 图片资源优化
+
+### 用户体验
+- 提供加载状态反馈
+- 合理的错误提示
+- 流畅的页面切换动画
+
+---
+
+**🔍 记住：查看 `.cursor/docs/project-architecture.md` 获取完整架构指南**

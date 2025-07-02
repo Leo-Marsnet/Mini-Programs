@@ -1,7 +1,7 @@
 {
-  "description": "项目配置文件，详见文档：https://developers.weixin.qq.com/miniprogram/dev/devtools/projectconfig.html",
+  "description": "微信小程序项目配置（Cursor开发环境）",
   "miniprogramRoot": "miniprogram/",
-  "cloudfunctionRoot": "cloudfunctions/",
+  "cloudfunctionRoot": "miniprogram/cloud/functions/",
   "setting": {
     "urlCheck": true,
     "es6": true,
@@ -52,29 +52,22 @@
   "compileType": "miniprogram",
   "simulatorType": "wechat",
   "simulatorPluginLibVersion": {},
-  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/",
-  "condition": {
-    "miniprogram": {
-      "list": [
-        {
-          "name": "page/API/pages/storage/storage",
-          "pathName": "page/API/pages/storage/storage",
-          "query": "",
-          "scene": null
-        }
-      ]
-    }
-  },
-  "srcMiniprogramRoot": "miniprogram/",
   "editorSetting": {
     "tabIndent": "insertSpaces",
     "tabSize": 2
   },
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      "test/**/*",
+      "scripts/**/*",
+      ".cursor/**/*",
+      ".vscode/**/*",
+      "*.md",
+      "jest.config.js"
+    ],
     "include": []
   },
-  "appid": "wxe5f52902cf4de896",
-  "projectname": "miniprogram-demo-master",
+  "appid": "wxb5c8100857b47542",
+  "projectname": "miniprogram-demo",
   "libVersion": "3.7.6"
 }

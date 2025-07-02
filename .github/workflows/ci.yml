@@ -1,0 +1,182 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v3
+
+    - name: 设置 Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: 安装依赖
+      run: npm ci
+
+    - name: 运行代码检查
+      run: npm run lint
+
+    - name: 运行单元测试
+      run: npm run test
+
+    - name: 生成测试覆盖率报告
+      run: npm run test:coverage
+
+    - name: 上传覆盖率报告到 Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+
+    - name: 构建项目
+      run: npm run build
+      if: success()
+
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v3
+
+    - name: 运行安全审计
+      run: npm audit --audit-level moderate
+
+    - name: 检查依赖漏洞
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+
+    - name: 安装依赖
+      run: npm ci
+
+    - name: 运行安全检查
+      run: npm run security-check
+      continue-on-error: true
+
+  deploy-staging:
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+
+    environment:
+      name: staging
+      url: https://staging.your-domain.com
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v3
+
+    - name: 设置 Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: 安装依赖
+      run: npm ci
+
+    - name: 构建生产版本
+      run: npm run build:staging
+      env:
+        NODE_ENV: staging
+
+    - name: 部署到测试环境
+      run: |
+        echo "部署到测试环境..."
+        # 这里添加实际的部署脚本
+        # 例如上传到微信开发者工具或CI平台
+
+    - name: 通知部署结果
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployment'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: always()
+
+  deploy-production:
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    environment:
+      name: production
+      url: https://your-domain.com
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v3
+
+    - name: 设置 Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: 安装依赖
+      run: npm ci
+
+    - name: 构建生产版本
+      run: npm run build:production
+      env:
+        NODE_ENV: production
+
+    - name: 运行生产前检查
+      run: npm run pre-deploy-check
+
+    - name: 部署到生产环境
+      run: |
+        echo "部署到生产环境..."
+        # 这里添加实际的部署脚本
+        # 例如上传到微信小程序后台
+
+    - name: 创建发布标签
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git tag -a "v$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)" -m "Production release $(date +'%Y-%m-%d %H:%M:%S')"
+        git push origin --tags
+
+    - name: 通知部署结果
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployment'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: always()
+
+  performance-test:
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v3
+
+    - name: 运行性能测试
+      run: |
+        echo "运行性能测试..."
+        # 这里可以集成性能测试工具
+        # 例如 Lighthouse CI 等
+
+    - name: 生成性能报告
+      run: |
+        echo "生成性能报告..."
+        # 生成并上传性能报告

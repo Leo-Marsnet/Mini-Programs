@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+miniprogram/node_modules/
+miniprogram/miniprogram_npm/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Version control
+.git/
+.svn/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Project specific
+project.private.config.json
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# WeChat MiniProgram
+miniprogram/sitemap.json
+**/project.config.json
+
+# Generated files
+package-lock.json
+yarn.lock
+
+# Documentation that should preserve formatting
+CHANGELOG.md
+
+# Cursor configuration files
+.cursorrules
+template.cursorrules

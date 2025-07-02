@@ -25,14 +25,14 @@ Component({
   },
   methods: {
     close() {
-      const { data } = this
-      console.log('@@@ close', data.maskClosable)
-      if (!data.maskClosable) return
+      const { data } = this;
+      console.log('@@@ close', data.maskClosable);
+      if (!data.maskClosable) return;
       this.setData({
-        enable: !this.data.enable
-      })
-      this.triggerEvent('close', {}, {})
+        enable: !this.data.enable,
+      });
+      this.triggerEvent('close', {}, {});
     },
     // stopEvent() {},
   },
-})
+});

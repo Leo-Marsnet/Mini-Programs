@@ -1,0 +1,76 @@
+<!--首页-->
+<view class="container">
+  <!-- 头部区域 -->
+  <view class="card rounded-lg">
+    <view class="text-center">
+      <text class="text-xl font-bold text-primary">{{greeting}}</text>
+      <text class="text-sm text-secondary mt-8">{{systemInfo.currentTime || ''}}</text>
+    </view>
+  </view>
+
+  <!-- 用户信息区域 -->
+  <view class="card">
+    <view wx:if="{{hasLogin}}" class="flex-align-center">
+      <image class="avatar rounded-full" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+      <view class="flex-1 px-16">
+        <text class="text-lg font-bold text-primary">{{userInfo.nickName}}</text>
+        <text class="text-sm text-secondary">欢迎回来！</text>
+      </view>
+      <button class="btn-small bg-warning text-white" bindtap="handleLogout">退出</button>
+    </view>
+
+    <view wx:else class="text-center">
+      <text class="text-base text-secondary mb-16">登录后享受更多功能</text>
+      <button class="btn bg-primary text-white" bindtap="handleLogin">立即登录</button>
+    </view>
+  </view>
+
+  <!-- 功能区域 -->
+  <view class="card">
+    <text class="section-title">功能演示</text>
+    <view class="function-grid">
+      <view class="function-item card" bindtap="testApiCall">
+        <text class="function-icon">🌐</text>
+        <text class="text-sm text-center">网络请求</text>
+      </view>
+
+      <view class="function-item card" bindtap="goToProfile">
+        <text class="function-icon">👤</text>
+        <text class="text-sm text-center">个人中心</text>
+      </view>
+
+      <view class="function-item card" bindtap="refreshData">
+        <text class="function-icon">🔄</text>
+        <text class="text-sm text-center">刷新数据</text>
+      </view>
+
+      <view class="function-item card">
+        <text class="function-icon">⚙️</text>
+        <text class="text-sm text-center">设置</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 系统信息区域 -->
+  <view class="card">
+    <text class="section-title">系统信息</text>
+    <view class="info-list">
+      <view class="info-item flex-between py-8">
+        <text class="text-base text-secondary">设备型号:</text>
+        <text class="text-base">{{systemInfo.model || '未知'}}</text>
+      </view>
+      <view class="info-item flex-between py-8">
+        <text class="text-base text-secondary">系统版本:</text>
+        <text class="text-base">{{systemInfo.system || '未知'}}</text>
+      </view>
+      <view class="info-item flex-between py-8">
+        <text class="text-base text-secondary">微信版本:</text>
+        <text class="text-base">{{systemInfo.version || '未知'}}</text>
+      </view>
+      <view class="info-item flex-between py-8">
+        <text class="text-base text-secondary">基础库版本:</text>
+        <text class="text-base">{{systemInfo.SDKVersion || '未知'}}</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,308 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+---
+type: MANUAL
+name: wechat-miniprogram-components
+source: https://developers.weixin.qq.com/miniprogram/dev/component/
+---
+
+
+## 视图容器
+
+### view
+- **描述**：视图容器，用于布局和显示内容。
+- **关键属性**：
+  - `hover-class`: (String) 指定按下去的样式类。当 `hover-class="none"` 时，没有点击态效果。
+  - `hover-stop-propagation`: (Boolean) 指定是否阻止本节点的祖先节点出现点击态。
+  - `hover-start-time`: (Number) 按住后多久出现点击态，单位毫秒。
+  - `hover-stay-time`: (Number) 手指松开后点击态保留时间，单位毫秒。
+- **示例**：
+  ```wxml
+  <view class="container">
+    <text>这是一个视图容器</text>
+  </view>
+  ```
+
+### scroll-view
+- **描述**：可滚动视图区域。
+- **关键属性**：
+  - `scroll-x`: (Boolean) 允许横向滚动。
+  - `scroll-y`: (Boolean) 允许纵向滚动。
+  - `scroll-top`: (Number) 设置竖向滚动条位置。
+  - `scroll-left`: (Number) 设置横向滚动条位置。
+  - `scroll-into-view`: (String) 值应为某子元素id，设置哪个方向可滚动。
+- **示例**：
+  ```wxml
+  <scroll-view scroll-y="true" style="height: 150px;">
+    <view style="height: 50px;">Item 1</view>
+    <view style="height: 50px;">Item 2</view>
+    <view style="height: 50px;">Item 3</view>
+  </scroll-view>
+  ```
+
+## 基本内容
+
+### text
+- **描述**：文本组件，用于显示文本内容。
+- **关键属性**：
+  - `selectable`: (Boolean) 文本是否可选。
+  - `space`: (String) 显示连续空格。
+  - `decode`: (Boolean) 是否解码。
+- **示例**：
+  ```wxml
+  <text selectable="true">可选择的文本</text>
+  ```
+
+### icon
+- **描述**：图标组件，用于展示图标。
+- **关键属性**：
+  - `type`: (String) 图标类型。
+  - `size`: (Number) 图标大小。
+  - `color`: (String) 图标颜色。
+- **示例**：
+  ```wxml
+  <icon type="success" size="30" color="#4CAF50"></icon>
+  ```
+
+## 表单组件
+
+### button
+- **描述**：创建一个用于用户交互的按钮。
+- **关键属性**：
+  - `size`: (String) "default" 或 "mini"。默认为 "default"。
+  - `type`: (String) "primary", "default", "warn"。默认为 "default"。
+  - `plain`: (Boolean) 按钮是否为空心。默认为 false。
+  - `disabled`: (Boolean) 禁用按钮。默认为 false。
+  - `loading`: (Boolean) 显示加载指示器。默认为 false。
+  - `open-type`: (String) 点击时的特殊功能，例如 "contact", "share", "getUserInfo"。
+- **示例**：
+  ```wxml
+  <!-- 一个主要操作按钮 -->
+  <button type="primary" bindtap="submitForm">提交</button>
+
+  <!-- 一个较小的分享按钮 -->
+  <button size="mini" open-type="share">分享</button>
+  ```
+
+### input
+- **描述**：输入框组件，用于接收用户输入。
+- **关键属性**：
+  - `value`: (String) 输入框的初始内容。
+  - `type`: (String) 输入框类型，如 "text", "number"。
+  - `password`: (Boolean) 是否是密码类型。
+  - `placeholder`: (String) 输入框为空时占位符。
+- **示例**：
+  ```wxml
+  <input type="text" placeholder="请输入内容" bindinput="handleInput" />
+  ```
+
+## 导航
+
+### navigator
+- **描述**：页面链接，用于在小程序内页面间跳转。
+- **关键属性**：
+  - `url`: (String) 跳转的目标页面路径。
+  - `open-type`: (String) 跳转方式，如 "navigate", "redirect", "switchTab"。
+- **示例**：
+  ```wxml
+  <navigator url="/pages/index/index" open-type="navigate">跳转到首页</navigator>
+  ```
+
+## 媒体组件
+
+### image
+- **描述**：图片组件，用于展示图片。
+- **关键属性**：
+  - `src`: (String) 图片资源地址。
+  - `mode`: (String) 图片裁剪、缩放的模式。
+  - `lazy-load`: (Boolean) 图片懒加载。
+- **示例**：
+  ```wxml
+  <image src="/images/example.png" mode="aspectFill" style="width: 100px; height: 100px;"></image>
+  ```
+
+### video
+- **描述**：视频组件，用于播放视频。
+- **关键属性**：
+  - `src`: (String) 视频资源地址。
+  - `controls`: (Boolean) 是否显示默认播放控件。
+  - `autoplay`: (Boolean) 是否自动播放。
+- **示例**：
+  ```wxml
+  <video src="/videos/example.mp4" controls autoplay></video>
+  ```
+
+## 表单组件扩展
+
+### picker
+- **描述**：从底部弹起的滚动选择器。
+- **关键属性**：
+  - `mode`: (String) 选择器类型。可选值：selector, multiSelector, time, date, region。
+  - `range`: (Array) 当mode为selector或multiSelector时，range有效。
+  - `value`: (Number/String) 表示选择了range中的第几个（下标从0开始）。
+- **示例**：
+  ```wxml
+  <!-- 普通选择器 -->
+  <picker mode="selector" range="{{fruits}}" bindchange="onPickerChange">
+    <view class="picker">当前选择：{{fruits[index]}}</view>
+  </picker>
+
+  <!-- 日期选择器 -->
+  <picker mode="date" value="{{date}}" start="2015-09-01" end="2025-09-01" bindchange="onDateChange">
+    <view class="picker">当前选择：{{date}}</view>
+  </picker>
+  ```
+
+### switch
+- **描述**：开关选择器。
+- **关键属性**：
+  - `checked`: (Boolean) 是否选中。
+  - `disabled`: (Boolean) 是否禁用。
+  - `type`: (String) 样式，有效值：switch, checkbox。
+  - `color`: (String) switch的颜色，同css的color。
+- **示例**：
+  ```wxml
+  <switch checked="{{switchChecked}}" bindchange="onSwitchChange" />
+  ```
+
+### slider
+- **描述**：滑动选择器。
+- **关键属性**：
+  - `min`: (Number) 最小值。默认0。
+  - `max`: (Number) 最大值。默认100。
+  - `step`: (Number) 步长。默认1。
+  - `value`: (Number) 当前取值。默认0。
+  - `show-value`: (Boolean) 是否显示当前value。
+- **示例**：
+  ```wxml
+  <slider min="0" max="100" value="{{sliderValue}}" show-value bindchange="onSliderChange" />
+  ```
+
+## 导航扩展
+
+### swiper
+- **描述**：滑块视图容器。其中只可放置swiper-item组件。
+- **关键属性**：
+  - `indicator-dots`: (Boolean) 是否显示面板指示点。
+  - `indicator-color`: (String) 指示点颜色。
+  - `indicator-active-color`: (String) 当前选中的指示点颜色。
+  - `autoplay`: (Boolean) 是否自动切换。
+  - `interval`: (Number) 自动切换时间间隔。
+  - `duration`: (Number) 滑动动画时长。
+- **示例**：
+  ```wxml
+  <swiper indicator-dots="{{indicatorDots}}" autoplay="{{autoplay}}" interval="{{interval}}" duration="{{duration}}">
+    <swiper-item>
+      <view class="swiper-item">A</view>
+    </swiper-item>
+    <swiper-item>
+      <view class="swiper-item">B</view>
+    </swiper-item>
+    <swiper-item>
+      <view class="swiper-item">C</view>
+    </swiper-item>
+  </swiper>
+  ```
+
+### swiper-item
+- **描述**：仅可放置在swiper组件中，宽高自动设置为100%。
+- **示例**：
+  ```wxml
+  <swiper-item>
+    <image src="/images/banner1.jpg" mode="aspectFill" />
+  </swiper-item>
+  ```
+
+## 媒体组件扩展
+
+### audio
+- **描述**：音频组件。
+- **关键属性**：
+  - `src`: (String) 音频资源的地址。
+  - `loop`: (Boolean) 是否循环播放。
+  - `controls`: (Boolean) 是否显示默认控件。
+  - `poster`: (String) 默认控件上的音频封面的图片资源地址。
+- **示例**：
+  ```wxml
+  <audio src="{{audioSrc}}" controls poster="{{audioPoster}}" name="{{audioName}}" author="{{audioAuthor}}" />
+  ```
+
+### camera
+- **描述**：系统相机。
+- **关键属性**：
+  - `mode`: (String) 应用模式。可选值：normal(相机模式), scanCode(扫码模式)。
+  - `resolution`: (String) 分辨率。可选值：low, medium, high。
+  - `device-position`: (String) 摄像头朝向。可选值：front, back。
+  - `flash`: (String) 闪光灯。可选值：auto, on, off。
+- **示例**：
+  ```wxml
+  <camera device-position="back" flash="off" binderror="onCameraError">
+    <cover-view class="controls">
+      <cover-view bindtap="takePhoto">拍照</cover-view>
+      <cover-view bindtap="startRecord">开始录像</cover-view>
+      <cover-view bindtap="stopRecord">结束录像</cover-view>
+    </cover-view>
+  </camera>
+  ```
+
+## 地图组件
+
+### map
+- **描述**：地图组件。
+- **关键属性**：
+  - `longitude`: (Number) 中心经度。
+  - `latitude`: (Number) 中心纬度。
+  - `scale`: (Number) 缩放级别，取值范围为3-20。
+  - `markers`: (Array) 标记点。
+  - `polyline`: (Array) 路线。
+  - `circles`: (Array) 圆。
+  - `show-location`: (Boolean) 显示带有方向的当前定位点。
+- **示例**：
+  ```wxml
+  <map
+    id="map"
+    longitude="{{longitude}}"
+    latitude="{{latitude}}"
+    scale="{{scale}}"
+    markers="{{markers}}"
+    show-location
+    bindmarkertap="onMarkerTap"
+  ></map>
+  ```
+
+## 画布组件
+
+### canvas
+- **描述**：画布组件。
+- **关键属性**：
+  - `canvas-id`: (String) canvas组件的唯一标识符。
+  - `disable-scroll`: (Boolean) 当在canvas中移动时且有绑定手势事件时，禁止屏幕滚动以及下拉刷新。
+- **示例**：
+  ```wxml
+  <canvas canvas-id="myCanvas" disable-scroll bindtouchstart="onTouchStart" />
+  ```
+
+## 开放能力组件
+
+### web-view
+- **描述**：承载网页的容器。会自动铺满整个小程序页面。
+- **关键属性**：
+  - `src`: (String) webview指向网页的链接。
+- **示例**：
+  ```wxml
+  <web-view src="{{webviewUrl}}" bindmessage="onWebviewMessage" />
+  ```
+
+### ad
+- **描述**：广告组件。
+- **关键属性**：
+  - `unit-id`: (String) 广告单元id。
+  - `ad-intervals`: (Number) 广告自动刷新的间隔时间。
+- **示例**：
+  ```wxml
+  <ad unit-id="{{adUnitId}}" binderror="onAdError" bindload="onAdLoad" />
+  ```
+

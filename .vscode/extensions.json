@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "qiu8310.minapp-vscode",
+    "ms-ceintl.vscode-language-pack-zh-hans",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-next",
+    "formulahendry.auto-rename-tag",
+    "ms-vscode.vscode-json",
+    "mrmlnc.vscode-less"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-typescript-tslint-plugin"
+  ]
+}
