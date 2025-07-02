@@ -1,0 +1,1281 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 微信小程序项目配置优化指南
+
+> **版本**: 2025年1月最新版
+> **适用范围**: 小程序项目配置、性能优化、开发效率提升
+
+## 📋 目录
+
+- [项目配置优化](#项目配置优化)
+- [性能优化策略](#性能优化策略)
+- [开发效率提升](#开发效率提升)
+- [代码质量保证](#代码质量保证)
+- [部署发布优化](#部署发布优化)
+- [监控与分析](#监控与分析)
+
+---
+
+## 项目配置优化
+
+### project.config.json 优化
+
+```json
+{
+  "description": "项目配置文件",
+  "packOptions": {
+    "ignore": [
+      {
+        "type": "file",
+        "value": ".eslintrc.js"
+      },
+      {
+        "type": "file",
+        "value": ".gitignore"
+      },
+      {
+        "type": "file",
+        "value": "README.md"
+      },
+      {
+        "type": "folder",
+        "value": "docs"
+      },
+      {
+        "type": "folder",
+        "value": "test"
+      }
+    ]
+  },
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "preloadBackgroundData": false,
+    "minified": true,
+    "newFeature": true,
+    "coverView": true,
+    "nodeModules": false,
+    "autoAudits": true,
+    "showShadowRootInWxmlPanel": true,
+    "scopeDataCheck": false,
+    "uglifyFileName": false,
+    "checkInvalidKey": true,
+    "checkSiteMap": true,
+    "uploadWithSourceMap": true,
+    "compileHotReLoad": false,
+    "lazyloadPlaceholderEnable": false,
+    "useMultiFrameRuntime": true,
+    "useApiHook": true,
+    "useApiHostProcess": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    },
+    "enableEngineNative": false,
+    "useIsolateContext": false,
+    "userConfirmedBundleSwitch": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "disableUseStrict": false,
+    "minifyWXML": true,
+    "showES6CompileOption": false,
+    "useCompilerPlugins": false
+  },
+  "compileType": "miniprogram",
+  "libVersion": "2.33.1",
+  "appid": "your_app_id",
+  "projectname": "miniprogram-demo",
+  "condition": {
+    "search": {
+      "list": []
+    },
+    "conversation": {
+      "list": []
+    },
+    "game": {
+      "list": []
+    },
+    "plugin": {
+      "list": []
+    },
+    "gamePlugin": {
+      "list": []
+    },
+    "miniprogram": {
+      "list": [
+        {
+          "name": "首页",
+          "pathName": "pages/index/index",
+          "query": "",
+          "scene": null
+        },
+        {
+          "name": "个人中心",
+          "pathName": "pages/profile/profile",
+          "query": "id=123",
+          "scene": null
+        }
+      ]
+    }
+  }
+}
+```
+
+### sitemap.json 优化
+
+```json
+{
+  "desc": "关于本文件的更多信息，请参考文档 https://developers.weixin.qq.com/miniprogram/dev/framework/sitemap.html",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "pages/index/index"
+    },
+    {
+      "action": "allow",
+      "page": "pages/article/detail",
+      "params": ["id"]
+    },
+    {
+      "action": "disallow",
+      "page": "pages/profile/*"
+    },
+    {
+      "action": "disallow",
+      "page": "pages/admin/*"
+    }
+  ]
+}
+```
+
+---
+
+## 性能优化策略
+
+### 1. 分包配置优化
+
+```json
+{
+  "pages": [
+    "pages/index/index",
+    "pages/search/search"
+  ],
+  "subpackages": [
+    {
+      "root": "packageA",
+      "name": "user",
+      "pages": [
+        "pages/profile/profile",
+        "pages/settings/settings"
+      ]
+    },
+    {
+      "root": "packageB",
+      "name": "business",
+      "pages": [
+        "pages/order/list",
+        "pages/order/detail"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/index/index": {
+      "network": "all",
+      "packages": ["user"]
+    }
+  },
+  "lazyCodeLoading": "requiredComponents"
+}
+```
+
+### 2. 图片资源优化
+
+```javascript
+// utils/image-optimizer.js
+class ImageOptimizer {
+  // 压缩图片
+  static compressImage(src, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+      const canvas = wx.createCanvasContext('compressCanvas');
+      const img = canvas.createImage();
+
+      img.onload = () => {
+        const { width, height } = img;
+        const ratio = Math.min(800 / width, 800 / height);
+        const newWidth = width * ratio;
+        const newHeight = height * ratio;
+
+        canvas.drawImage(img, 0, 0, newWidth, newHeight);
+        canvas.draw(false, () => {
+          wx.canvasToTempFilePath({
+            canvasId: 'compressCanvas',
+            quality: quality,
+            success: resolve,
+            fail: reject
+          });
+        });
+      };
+
+      img.src = src;
+    });
+  }
+
+  // 生成缩略图
+  static generateThumbnail(src, size = 200) {
+    return this.compressImage(src, 0.6).then(res => {
+      // 进一步处理缩略图
+      return res.tempFilePath;
+    });
+  }
+
+  // 懒加载图片
+  static lazyLoadImages(selector = '.lazy-image') {
+    const observer = wx.createIntersectionObserver();
+
+    observer.relativeToViewport().observe(selector, (res) => {
+      if (res.intersectionRatio > 0) {
+        const dataset = res.target.dataset;
+        const realSrc = dataset.src;
+
+        // 加载真实图片
+        res.target.src = realSrc;
+        observer.unobserve(res.target);
+      }
+    });
+
+    return observer;
+  }
+}
+
+module.exports = ImageOptimizer;
+```
+
+### 3. 数据缓存优化
+
+```javascript
+// utils/cache-manager.js
+class CacheManager {
+  constructor() {
+    this.memoryCache = new Map();
+    this.maxMemorySize = 50; // 内存缓存最大条数
+  }
+
+  // 多级缓存策略
+  async get(key, fetcher, options = {}) {
+    const {
+      memoryTTL = 5 * 60 * 1000,  // 内存缓存5分钟
+      storageTTL = 30 * 60 * 1000, // 本地存储30分钟
+      forceRefresh = false
+    } = options;
+
+    if (forceRefresh) {
+      return this.fetchAndCache(key, fetcher, { memoryTTL, storageTTL });
+    }
+
+    // 1. 检查内存缓存
+    const memoryData = this.getFromMemory(key);
+    if (memoryData && !this.isExpired(memoryData, memoryTTL)) {
+      return memoryData.data;
+    }
+
+    // 2. 检查本地存储缓存
+    const storageData = this.getFromStorage(key);
+    if (storageData && !this.isExpired(storageData, storageTTL)) {
+      // 同步到内存缓存
+      this.setToMemory(key, storageData.data);
+      return storageData.data;
+    }
+
+    // 3. 从网络获取
+    return this.fetchAndCache(key, fetcher, { memoryTTL, storageTTL });
+  }
+
+  async fetchAndCache(key, fetcher, { memoryTTL, storageTTL }) {
+    try {
+      const data = await fetcher();
+
+      // 缓存到内存和本地存储
+      this.setToMemory(key, data);
+      this.setToStorage(key, data);
+
+      return data;
+    } catch (error) {
+      console.error('获取数据失败', error);
+
+      // 尝试返回过期的缓存数据
+      const fallbackData = this.getFromStorage(key);
+      if (fallbackData) {
+        return fallbackData.data;
+      }
+
+      throw error;
+    }
+  }
+
+  getFromMemory(key) {
+    return this.memoryCache.get(key);
+  }
+
+  setToMemory(key, data) {
+    // LRU 淘汰策略
+    if (this.memoryCache.size >= this.maxMemorySize) {
+      const firstKey = this.memoryCache.keys().next().value;
+      this.memoryCache.delete(firstKey);
+    }
+
+    this.memoryCache.set(key, {
+      data,
+      timestamp: Date.now()
+    });
+  }
+
+  getFromStorage(key) {
+    try {
+      const stored = wx.getStorageSync(`cache_${key}`);
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  setToStorage(key, data) {
+    try {
+      wx.setStorageSync(`cache_${key}`, JSON.stringify({
+        data,
+        timestamp: Date.now()
+      }));
+    } catch (error) {
+      console.error('缓存到本地存储失败', error);
+    }
+  }
+
+  isExpired(cacheData, ttl) {
+    return Date.now() - cacheData.timestamp > ttl;
+  }
+
+  clear(key) {
+    if (key) {
+      this.memoryCache.delete(key);
+      wx.removeStorageSync(`cache_${key}`);
+    } else {
+      this.memoryCache.clear();
+      // 清除所有缓存
+      const info = wx.getStorageInfoSync();
+      info.keys.forEach(k => {
+        if (k.startsWith('cache_')) {
+          wx.removeStorageSync(k);
+        }
+      });
+    }
+  }
+}
+
+module.exports = new CacheManager();
+```
+
+### 4. 请求优化
+
+```javascript
+// utils/request-optimizer.js
+class RequestOptimizer {
+  constructor() {
+    this.pendingRequests = new Map();
+    this.requestQueue = [];
+    this.maxConcurrent = 10;
+    this.currentRequests = 0;
+  }
+
+  // 请求去重
+  async request(url, options = {}) {
+    const key = this.generateKey(url, options);
+
+    // 如果有相同的请求正在进行，直接返回Promise
+    if (this.pendingRequests.has(key)) {
+      return this.pendingRequests.get(key);
+    }
+
+    const promise = this.executeRequest(url, options);
+    this.pendingRequests.set(key, promise);
+
+    promise.finally(() => {
+      this.pendingRequests.delete(key);
+    });
+
+    return promise;
+  }
+
+  // 并发控制
+  async executeRequest(url, options) {
+    return new Promise((resolve, reject) => {
+      const task = { url, options, resolve, reject };
+
+      if (this.currentRequests < this.maxConcurrent) {
+        this.processRequest(task);
+      } else {
+        this.requestQueue.push(task);
+      }
+    });
+  }
+
+  async processRequest({ url, options, resolve, reject }) {
+    this.currentRequests++;
+
+    try {
+      const result = await this.makeRequest(url, options);
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    } finally {
+      this.currentRequests--;
+
+      // 处理队列中的下一个请求
+      if (this.requestQueue.length > 0) {
+        const nextTask = this.requestQueue.shift();
+        this.processRequest(nextTask);
+      }
+    }
+  }
+
+  makeRequest(url, options) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url,
+        ...options,
+        success: (res) => {
+          if (res.statusCode === 200) {
+            resolve(res.data);
+          } else {
+            reject(new Error(`HTTP ${res.statusCode}`));
+          }
+        },
+        fail: reject
+      });
+    });
+  }
+
+  generateKey(url, options) {
+    return `${options.method || 'GET'}_${url}_${JSON.stringify(options.data || {})}`;
+  }
+
+  // 批量请求
+  async batchRequest(requests, options = {}) {
+    const { batchSize = 5, delay = 100 } = options;
+    const results = [];
+
+    for (let i = 0; i < requests.length; i += batchSize) {
+      const batch = requests.slice(i, i + batchSize);
+      const batchPromises = batch.map(req => this.request(req.url, req.options));
+
+      try {
+        const batchResults = await Promise.all(batchPromises);
+        results.push(...batchResults);
+
+        // 批次间延迟
+        if (i + batchSize < requests.length) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      } catch (error) {
+        console.error('批量请求失败', error);
+        throw error;
+      }
+    }
+
+    return results;
+  }
+}
+
+module.exports = new RequestOptimizer();
+```
+
+---
+
+## 开发效率提升
+
+### 1. 自动化脚本
+
+```javascript
+// scripts/auto-generate.js
+const fs = require('fs');
+const path = require('path');
+
+class PageGenerator {
+  static generate(pageName, options = {}) {
+    const { hasTab = false, template = 'basic' } = options;
+    const pagePath = path.join('pages', pageName);
+
+    // 创建目录
+    if (!fs.existsSync(pagePath)) {
+      fs.mkdirSync(pagePath, { recursive: true });
+    }
+
+    // 生成文件
+    this.generateJS(pagePath, pageName, template);
+    this.generateJSON(pagePath, pageName, hasTab);
+    this.generateWXML(pagePath, pageName, template);
+    this.generateWXSS(pagePath, pageName);
+
+    console.log(`页面 ${pageName} 生成完成！`);
+  }
+
+  static generateJS(pagePath, pageName, template) {
+    let content = '';
+
+    switch (template) {
+      case 'list':
+        content = this.getListTemplate(pageName);
+        break;
+      case 'detail':
+        content = this.getDetailTemplate(pageName);
+        break;
+      default:
+        content = this.getBasicTemplate(pageName);
+    }
+
+    fs.writeFileSync(path.join(pagePath, `${pageName}.js`), content);
+  }
+
+  static getBasicTemplate(pageName) {
+    return `// pages/${pageName}/${pageName}.js
+const app = getApp();
+
+Page({
+  data: {
+    loading: false
+  },
+
+  onLoad(options) {
+    console.log('${pageName} 页面加载', options);
+    this.initPage();
+  },
+
+  onReady() {
+    console.log('${pageName} 页面渲染完成');
+  },
+
+  onShow() {
+    console.log('${pageName} 页面显示');
+  },
+
+  onHide() {
+    console.log('${pageName} 页面隐藏');
+  },
+
+  onUnload() {
+    console.log('${pageName} 页面卸载');
+  },
+
+  onPullDownRefresh() {
+    this.refreshData();
+  },
+
+  onReachBottom() {
+    console.log('触底加载更多');
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '${pageName}页面',
+      path: '/pages/${pageName}/${pageName}'
+    };
+  },
+
+  // 初始化页面
+  initPage() {
+    this.loadData();
+  },
+
+  // 加载数据
+  async loadData() {
+    this.setData({ loading: true });
+
+    try {
+      // TODO: 实现数据加载逻辑
+      console.log('加载数据...');
+
+      this.setData({ loading: false });
+    } catch (error) {
+      console.error('加载数据失败', error);
+      this.setData({ loading: false });
+
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 刷新数据
+  async refreshData() {
+    try {
+      await this.loadData();
+      wx.showToast({
+        title: '刷新成功',
+        icon: 'success'
+      });
+    } catch (error) {
+      wx.showToast({
+        title: '刷新失败',
+        icon: 'none'
+      });
+    } finally {
+      wx.stopPullDownRefresh();
+    }
+  }
+});`;
+  }
+
+  static generateJSON(pagePath, pageName, hasTab) {
+    const config = {
+      navigationBarTitleText: `${pageName}页面`,
+      enablePullDownRefresh: true,
+      onReachBottomDistance: 50,
+      usingComponents: {}
+    };
+
+    if (hasTab) {
+      delete config.enablePullDownRefresh;
+    }
+
+    fs.writeFileSync(
+      path.join(pagePath, `${pageName}.json`),
+      JSON.stringify(config, null, 2)
+    );
+  }
+
+  static generateWXML(pagePath, pageName, template) {
+    let content = '';
+
+    switch (template) {
+      case 'list':
+        content = this.getListWXML(pageName);
+        break;
+      case 'detail':
+        content = this.getDetailWXML(pageName);
+        break;
+      default:
+        content = this.getBasicWXML(pageName);
+    }
+
+    fs.writeFileSync(path.join(pagePath, `${pageName}.wxml`), content);
+  }
+
+  static getBasicWXML(pageName) {
+    return `<!--pages/${pageName}/${pageName}.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">${pageName}页面</text>
+  </view>
+
+  <view class="content">
+    <view wx:if="{{loading}}" class="loading">
+      <text>加载中...</text>
+    </view>
+
+    <view wx:else class="main-content">
+      <!-- TODO: 添加页面内容 -->
+      <text>页面内容区域</text>
+    </view>
+  </view>
+</view>`;
+  }
+
+  static generateWXSS(pagePath, pageName) {
+    const content = `/* pages/${pageName}/${pageName}.wxss */
+.container {
+  min-height: 100vh;
+  background: #f8f8f8;
+}
+
+.header {
+  padding: 20rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #eee;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.content {
+  flex: 1;
+  padding: 20rpx;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200rpx;
+  color: #666;
+}
+
+.main-content {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+}`;
+
+    fs.writeFileSync(path.join(pagePath, `${pageName}.wxss`), content);
+  }
+}
+
+// 使用示例
+// node scripts/auto-generate.js create-page user-profile --template=detail
+module.exports = PageGenerator;
+```
+
+### 2. 组件库配置
+
+```javascript
+// config/components.js
+module.exports = {
+  // 全局组件配置
+  globalComponents: {
+    // UI组件库
+    'van-button': '@vant/weapp/button/index',
+    'van-cell': '@vant/weapp/cell/index',
+    'van-icon': '@vant/weapp/icon/index',
+    'van-image': '@vant/weapp/image/index',
+    'van-loading': '@vant/weapp/loading/index',
+    'van-toast': '@vant/weapp/toast/index',
+    'van-dialog': '@vant/weapp/dialog/index',
+
+    // 自定义组件
+    'custom-header': '/components/layout/header/index',
+    'custom-footer': '/components/layout/footer/index',
+    'loading-spinner': '/components/ui/loading/index',
+    'error-boundary': '/components/ui/error-boundary/index'
+  },
+
+  // 页面级组件配置
+  pageComponents: {
+    'user-card': '/components/business/user-card/index',
+    'product-item': '/components/business/product-item/index',
+    'order-card': '/components/business/order-card/index'
+  }
+};
+```
+
+---
+
+## 代码质量保证
+
+### 1. ESLint 配置
+
+```javascript
+// .eslintrc.js
+module.exports = {
+  env: {
+    browser: true,
+    es6: true,
+    node: true
+  },
+  extends: [
+    'eslint:recommended'
+  ],
+  globals: {
+    wx: 'readonly',
+    getApp: 'readonly',
+    getCurrentPages: 'readonly',
+    Page: 'readonly',
+    Component: 'readonly',
+    App: 'readonly'
+  },
+  parserOptions: {
+    ecmaVersion: 2020,
+    sourceType: 'module'
+  },
+  rules: {
+    // 代码风格
+    'indent': ['error', 2],
+    'quotes': ['error', 'single'],
+    'semi': ['error', 'always'],
+    'comma-dangle': ['error', 'never'],
+
+    // 最佳实践
+    'no-console': 'warn',
+    'no-unused-vars': 'error',
+    'no-undef': 'error',
+    'prefer-const': 'error',
+    'no-var': 'error',
+
+    // 小程序特定规则
+    'no-global-assign': 'error',
+    'no-implicit-globals': 'error'
+  }
+};
+```
+
+### 2. 代码格式化配置
+
+```json
+// .prettierrc
+{
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": true,
+  "quoteProps": "as-needed",
+  "trailingComma": "none",
+  "bracketSpacing": true,
+  "arrowParens": "avoid",
+  "endOfLine": "lf"
+}
+```
+
+### 3. Git Hooks 配置
+
+```json
+// package.json
+{
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "*.{js,wxs}": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ],
+    "*.{wxml,wxss}": [
+      "prettier --write",
+      "git add"
+    ]
+  }
+}
+```
+
+---
+
+## 部署发布优化
+
+### 1. 构建优化
+
+```javascript
+// scripts/build.js
+const fs = require('fs');
+const path = require('path');
+const { minify } = require('terser');
+
+class BuildOptimizer {
+  static async optimize() {
+    console.log('开始构建优化...');
+
+    // 1. 压缩JS文件
+    await this.minifyJS();
+
+    // 2. 压缩WXSS文件
+    await this.minifyWXSS();
+
+    // 3. 优化图片资源
+    await this.optimizeImages();
+
+    // 4. 生成构建报告
+    await this.generateReport();
+
+    console.log('构建优化完成！');
+  }
+
+  static async minifyJS() {
+    const jsFiles = this.getFiles('.', /\.(js|wxs)$/);
+
+    for (const file of jsFiles) {
+      if (file.includes('node_modules')) continue;
+
+      const code = fs.readFileSync(file, 'utf8');
+      const result = await minify(code, {
+        compress: {
+          drop_console: true,
+          drop_debugger: true
+        },
+        mangle: false // 小程序不建议混淆
+      });
+
+      if (result.code) {
+        fs.writeFileSync(file, result.code);
+        console.log(`压缩完成: ${file}`);
+      }
+    }
+  }
+
+  static async minifyWXSS() {
+    const wxssFiles = this.getFiles('.', /\.wxss$/);
+
+    for (const file of wxssFiles) {
+      let content = fs.readFileSync(file, 'utf8');
+
+      // 简单的WXSS压缩
+      content = content
+        .replace(/\/\*[\s\S]*?\*\//g, '') // 移除注释
+        .replace(/\s+/g, ' ') // 压缩空白
+        .replace(/;\s*}/g, '}') // 移除最后的分号
+        .trim();
+
+      fs.writeFileSync(file, content);
+      console.log(`WXSS压缩完成: ${file}`);
+    }
+  }
+
+  static getFiles(dir, pattern) {
+    const files = [];
+
+    function traverse(currentDir) {
+      const items = fs.readdirSync(currentDir);
+
+      for (const item of items) {
+        const fullPath = path.join(currentDir, item);
+        const stat = fs.statSync(fullPath);
+
+        if (stat.isDirectory()) {
+          traverse(fullPath);
+        } else if (pattern.test(item)) {
+          files.push(fullPath);
+        }
+      }
+    }
+
+    traverse(dir);
+    return files;
+  }
+
+  static async generateReport() {
+    const report = {
+      buildTime: new Date().toISOString(),
+      fileCount: this.getFiles('.', /\.(js|wxml|wxss|json)$/).length,
+      imageCount: this.getFiles('.', /\.(png|jpg|jpeg|gif|svg)$/).length,
+      totalSize: this.calculateTotalSize()
+    };
+
+    fs.writeFileSync('build-report.json', JSON.stringify(report, null, 2));
+    console.log('构建报告生成完成:', report);
+  }
+
+  static calculateTotalSize() {
+    const files = this.getFiles('.', /\.(js|wxml|wxss|json|png|jpg|jpeg|gif|svg)$/);
+    let totalSize = 0;
+
+    files.forEach(file => {
+      const stat = fs.statSync(file);
+      totalSize += stat.size;
+    });
+
+    return `${(totalSize / 1024 / 1024).toFixed(2)} MB`;
+  }
+}
+
+module.exports = BuildOptimizer;
+```
+
+### 2. 版本管理
+
+```javascript
+// scripts/version-manager.js
+class VersionManager {
+  static updateVersion(type = 'patch') {
+    const packageJson = require('../package.json');
+    const version = packageJson.version.split('.');
+
+    switch (type) {
+      case 'major':
+        version[0] = String(Number(version[0]) + 1);
+        version[1] = '0';
+        version[2] = '0';
+        break;
+      case 'minor':
+        version[1] = String(Number(version[1]) + 1);
+        version[2] = '0';
+        break;
+      case 'patch':
+      default:
+        version[2] = String(Number(version[2]) + 1);
+        break;
+    }
+
+    const newVersion = version.join('.');
+    packageJson.version = newVersion;
+
+    fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2));
+
+    // 更新 app.json 中的版本信息
+    const appJson = require('../app.json');
+    appJson.version = newVersion;
+    fs.writeFileSync('app.json', JSON.stringify(appJson, null, 2));
+
+    console.log(`版本更新为: ${newVersion}`);
+    return newVersion;
+  }
+
+  static generateChangelog() {
+    // 生成更新日志
+    const changelog = `
+## [${new Date().toISOString().split('T')[0]}] - 版本更新
+
+### 新增
+- 新功能描述
+
+### 修复
+- Bug修复描述
+
+### 优化
+- 性能优化描述
+`;
+
+    fs.appendFileSync('CHANGELOG.md', changelog);
+  }
+}
+
+module.exports = VersionManager;
+```
+
+---
+
+## 监控与分析
+
+### 1. 性能监控
+
+```javascript
+// utils/performance-monitor.js
+class PerformanceMonitor {
+  constructor() {
+    this.metrics = {
+      pageLoadTime: {},
+      apiResponseTime: {},
+      memoryUsage: {},
+      errors: []
+    };
+  }
+
+  // 页面加载时间监控
+  startPageLoad(pageName) {
+    this.metrics.pageLoadTime[pageName] = {
+      startTime: Date.now()
+    };
+  }
+
+  endPageLoad(pageName) {
+    if (this.metrics.pageLoadTime[pageName]) {
+      const loadTime = Date.now() - this.metrics.pageLoadTime[pageName].startTime;
+      this.metrics.pageLoadTime[pageName].loadTime = loadTime;
+
+      console.log(`页面 ${pageName} 加载时间: ${loadTime}ms`);
+
+      // 上报性能数据
+      this.reportPerformance('pageLoad', {
+        page: pageName,
+        loadTime: loadTime
+      });
+    }
+  }
+
+  // API响应时间监控
+  startApiCall(apiName) {
+    this.metrics.apiResponseTime[apiName] = {
+      startTime: Date.now()
+    };
+  }
+
+  endApiCall(apiName, success = true) {
+    if (this.metrics.apiResponseTime[apiName]) {
+      const responseTime = Date.now() - this.metrics.apiResponseTime[apiName].startTime;
+      this.metrics.apiResponseTime[apiName].responseTime = responseTime;
+      this.metrics.apiResponseTime[apiName].success = success;
+
+      console.log(`API ${apiName} 响应时间: ${responseTime}ms, 成功: ${success}`);
+
+      // 上报API性能数据
+      this.reportPerformance('apiCall', {
+        api: apiName,
+        responseTime: responseTime,
+        success: success
+      });
+    }
+  }
+
+  // 内存使用监控
+  checkMemoryUsage() {
+    if (wx.getPerformance) {
+      const performance = wx.getPerformance();
+      const memInfo = performance.getMemoryInfo();
+
+      this.metrics.memoryUsage[Date.now()] = memInfo;
+
+      // 内存使用过高警告
+      if (memInfo.usedJSHeapSize > 50 * 1024 * 1024) { // 50MB
+        console.warn('内存使用过高:', memInfo);
+        this.reportPerformance('memoryWarning', memInfo);
+      }
+    }
+  }
+
+  // 错误监控
+  reportError(error, context) {
+    const errorInfo = {
+      message: error.message,
+      stack: error.stack,
+      context: context,
+      timestamp: Date.now(),
+      userAgent: wx.getSystemInfoSync()
+    };
+
+    this.metrics.errors.push(errorInfo);
+
+    console.error('错误上报:', errorInfo);
+
+    // 上报错误信息
+    this.reportPerformance('error', errorInfo);
+  }
+
+  // 性能数据上报
+  reportPerformance(type, data) {
+    // 这里可以集成第三方监控服务
+    // 如：腾讯云监控、阿里云监控、自建监控系统等
+
+    wx.request({
+      url: 'https://your-monitor-api.com/report',
+      method: 'POST',
+      data: {
+        type: type,
+        data: data,
+        appId: wx.getAccountInfoSync().miniProgram.appId,
+        timestamp: Date.now()
+      },
+      fail: (error) => {
+        console.error('性能数据上报失败:', error);
+      }
+    });
+  }
+
+  // 获取性能报告
+  getPerformanceReport() {
+    return {
+      ...this.metrics,
+      reportTime: Date.now()
+    };
+  }
+}
+
+module.exports = new PerformanceMonitor();
+```
+
+### 2. 用户行为分析
+
+```javascript
+// utils/analytics.js
+class Analytics {
+  constructor() {
+    this.sessionId = this.generateSessionId();
+    this.userId = null;
+    this.events = [];
+  }
+
+  // 初始化用户ID
+  setUserId(userId) {
+    this.userId = userId;
+  }
+
+  // 页面访问统计
+  trackPageView(pageName, params = {}) {
+    this.trackEvent('page_view', {
+      page: pageName,
+      params: params,
+      timestamp: Date.now()
+    });
+  }
+
+  // 事件统计
+  trackEvent(eventName, properties = {}) {
+    const event = {
+      eventName: eventName,
+      properties: {
+        ...properties,
+        sessionId: this.sessionId,
+        userId: this.userId,
+        timestamp: Date.now(),
+        systemInfo: wx.getSystemInfoSync()
+      }
+    };
+
+    this.events.push(event);
+
+    // 批量上报事件
+    if (this.events.length >= 10) {
+      this.flushEvents();
+    }
+  }
+
+  // 用户行为统计
+  trackUserAction(action, target, extra = {}) {
+    this.trackEvent('user_action', {
+      action: action,
+      target: target,
+      ...extra
+    });
+  }
+
+  // 商业指标统计
+  trackBusiness(metric, value, extra = {}) {
+    this.trackEvent('business_metric', {
+      metric: metric,
+      value: value,
+      ...extra
+    });
+  }
+
+  // 批量上报事件
+  flushEvents() {
+    if (this.events.length === 0) return;
+
+    const eventsToSend = [...this.events];
+    this.events = [];
+
+    wx.request({
+      url: 'https://your-analytics-api.com/events',
+      method: 'POST',
+      data: {
+        events: eventsToSend
+      },
+      success: () => {
+        console.log(`上报 ${eventsToSend.length} 个事件成功`);
+      },
+      fail: (error) => {
+        console.error('事件上报失败:', error);
+        // 失败的事件重新加入队列
+        this.events.unshift(...eventsToSend);
+      }
+    });
+  }
+
+  generateSessionId() {
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+}
+
+module.exports = new Analytics();
+```
+
+---
+
+## 总结
+
+通过以上优化策略，可以显著提升微信小程序的：
+
+1. **性能表现**: 分包加载、缓存策略、请求优化
+2. **开发效率**: 自动化脚本、组件库、代码生成
+3. **代码质量**: ESLint、Prettier、Git Hooks
+4. **发布流程**: 构建优化、版本管理、自动化部署
+5. **运营数据**: 性能监控、用户行为分析、错误上报
+
+这些优化措施能够帮助开发团队构建更加稳定、高效、可维护的小程序应用。
