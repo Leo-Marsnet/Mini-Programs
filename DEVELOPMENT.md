@@ -57,7 +57,7 @@ npm run init
 ```
 
 ### 4. 清理示例代码
-- 删除不需要的示例页面（`miniprogram/packageAPI/`、`miniprogram/packageComponent/` 等）
+- 删除不需要的示例页面
 - 保留核心文件结构和配置
 - 根据需要修改 `miniprogram/app.json` 中的页面路由
 
@@ -75,135 +75,214 @@ npm run init
 1. 打开微信开发者工具
 2. 导入项目，选择项目根目录
 3. 确保 AppID 已正确配置
-4. 点击【工具 → 构建 npm】
 
-## 开发工作流
+## 开发流程
 
-### 日常开发
-1. **在 Cursor 中编写代码**
-   - 享受 AI 智能补全
-   - 实时错误检测和修复建议
-   - 代码重构和优化
+### 代码开发
+使用 **Cursor** 进行代码编辑，支持：
+- 智能代码补全
+- ESLint 实时检查
+- 代码格式化
+- Git 版本控制
 
-2. **在微信开发者工具中预览**
-   - 实时查看页面效果
-   - 使用调试器调试逻辑
-   - 真机预览和测试
+### 调试测试
+使用 **微信开发者工具** 进行调试：
+- 实时预览
+- 真机调试
+- 性能分析
+- 代码上传发布
 
-3. **云开发（可选）**
-   - 在微信开发者工具中管理云函数
-   - 使用 Cursor 编写云函数代码
-   - 云数据库和存储管理
+## 技术规范
 
-### 代码规范
-项目已配置 ESLint 和 Prettier：
-```bash
-# 检查代码规范
-npm run lint
+### JavaScript 编码规范
+- 使用 ES2021+ 语法特性
+- 优先使用 `const` 和 `let`，避免 `var`
+- 使用箭头函数和解构赋值
+- 异步操作使用 `async/await`
 
-# 自动修复格式问题
-npm run lint -- --fix
+```javascript
+// ✅ 推荐写法
+const { request } = require('../utils/request');
+
+const fetchUserData = async (userId) => {
+  try {
+    const response = await request.get(`/api/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('获取用户数据失败:', error);
+    throw error;
+  }
+};
 ```
 
-## 项目结构
+### 小程序开发规范
+- 页面和组件使用小驼峰命名
+- 文件夹使用短横线分隔
+- 合理使用 `setData()` 更新数据
+- 避免在 `wxml` 中写复杂逻辑
 
+### 工具类使用
+- 网络请求统一使用 `utils/request.js`
+- 数据存储使用 `utils/storage.js`
+- 状态管理使用 `utils/store.js`
+- 错误处理使用 `utils/errorHandler.js`
+
+## 项目结构详解
+
+### 核心目录
 ```
-your-project/                    # 主项目目录 (Cursor开发环境)
-├── .cursor/                     # Cursor配置和文档
-├── scripts/                     # 辅助脚本
-├── test/                        # 测试文件
-├── package.json                 # 主项目依赖管理
-├── project.config.json          # Cursor开发环境配置
-├── README.md                    # 项目说明文档
-└── miniprogram/                 # 小程序根目录 ⭐
-    ├── app.js                   # 小程序入口
-    ├── app.json                 # 小程序配置
-    ├── project.config.json      # 微信开发者工具配置
-    ├── pages/                   # 页面目录
-    ├── components/              # 组件目录
-    ├── utils/                   # 工具类
-    ├── assets/                  # 静态资源
-    └── cloud/functions/         # 云函数
+miniprogram/
+├── app.js                 # 应用入口，全局生命周期
+├── app.json               # 全局配置，页面路由
+├── app.wxss               # 全局样式
+├── pages/                 # 页面目录
+│   └── index/
+│       ├── index.js       # 页面逻辑
+│       ├── index.json     # 页面配置
+│       ├── index.wxml     # 页面结构
+│       └── index.wxss     # 页面样式
+├── components/            # 自定义组件
+├── utils/                 # 工具函数库
+├── config/                # 环境配置
+├── assets/                # 静态资源
+└── cloud/                 # 云开发相关
 ```
 
-## 最佳实践
+### 工具类说明
+- `request.js`: HTTP 请求封装，支持拦截器和重试
+- `storage.js`: 本地存储管理，支持过期时间
+- `store.js`: 全局状态管理
+- `wx-utils.js`: 微信 API 封装
+- `format.js`: 数据格式化工具
+- `errorHandler.js`: 统一错误处理
 
-### 1. 目录组织
-- `pages/`: 按功能模块组织页面
-- `components/`: 可复用组件
-- `utils/`: 通用工具函数
-- `assets/`: 图片、字体等静态资源
+## 开发技巧
 
-### 2. 代码风格
-- 使用 TypeScript 获得更好的类型安全
-- 遵循 ESLint 规则
-- 组件和页面使用 Less 编写样式
+### 1. 环境切换
+```javascript
+// config/env.js
+const envVersion = __wxConfig.envVersion || 'develop';
+const config = configs[envVersion];
+```
 
-### 3. 性能优化
+### 2. 页面生命周期
+```javascript
+Page({
+  onLoad(options) {
+    // 页面加载时调用
+  },
+  onReady() {
+    // 页面初次渲染完成时调用
+  },
+  onShow() {
+    // 页面显示/切入前台时触发
+  }
+});
+```
+
+### 3. 组件通信
+```javascript
+// 父组件向子组件传递数据
+<custom-component prop-data="{{data}}" />
+
+// 子组件向父组件传递事件
+this.triggerEvent('customEvent', { data: 'value' });
+```
+
+### 4. 异步数据加载
+```javascript
+async loadData() {
+  try {
+    wx.showLoading({ title: '加载中...' });
+    const data = await request.get('/api/data');
+    this.setData({ data });
+  } catch (error) {
+    wx.showToast({ title: '加载失败', icon: 'error' });
+  } finally {
+    wx.hideLoading();
+  }
+}
+```
+
+## 性能优化
+
+### 1. 数据更新优化
+- 只更新变化的数据
+- 避免频繁调用 `setData()`
+- 使用数据路径更新
+
+### 2. 图片优化
+- 使用合适的图片格式和大小
+- 实现图片懒加载
+- 使用 CDN 加速
+
+### 3. 代码分包
 - 合理使用分包加载
-- 图片资源压缩和懒加载
-- 避免过度渲染
+- 按功能模块分包
+- 预加载重要分包
 
-### 4. 云开发集成
-- 云函数统一放在 `miniprogram/cloud/functions/` 目录
-- 使用环境变量管理不同环境配置
-- 数据库设计遵循小程序最佳实践
+## 调试技巧
 
-## 部署发布
-
-### 1. 构建项目
+### 1. 真机调试
 ```bash
-# 构建 npm 包
-npm run build
-
-# 代码检查
-npm run lint
+# 启用真机调试模式
+npm run dev:remote
 ```
 
-### 2. 上传代码
-在微信开发者工具中：
-1. 点击【上传】
-2. 填写版本号和项目备注
-3. 上传到微信后台
+### 2. 性能监控
+```javascript
+// 使用微信提供的性能监控
+wx.reportPerformance(1001, 100); // 上报性能数据
+```
 
-### 3. 发布流程
-1. 登录微信公众平台
-2. 提交审核
-3. 审核通过后发布
+### 3. 日志管理
+```javascript
+// 开发环境输出详细日志
+if (config.debug) {
+  console.log('调试信息:', data);
+}
+```
+
+## 发布流程
+
+### 1. 代码检查
+```bash
+npm run lint        # ESLint 检查
+npm run test        # 运行测试
+npm run build       # 构建检查
+```
+
+### 2. 版本发布
+```bash
+npm run release     # 发布新版本
+```
+
+### 3. 上传代码
+使用微信开发者工具上传代码到微信后台
 
 ## 常见问题
 
-### Q: 如何添加新页面？
-1. 在 `miniprogram/pages/` 下创建页面目录
-2. 在 `app.json` 的 `pages` 数组中添加页面路径
-3. Cursor 会自动创建对应的 `.js`、`.wxml`、`.wxss` 文件
+### 1. 环境配置问题
+- 确保 Node.js 版本 >= 14
+- 检查 npm 依赖是否完整安装
+- 确认微信开发者工具版本兼容
 
-### Q: 如何调试云函数？
-1. 在 Cursor 中打开云函数文件
-2. 使用 F5 启动调试，选择"云函数调试"配置
-3. 或在微信开发者工具中右键云函数进行本地调试
+### 2. 代码规范问题
+- 运行 `npm run lint:fix` 自动修复
+- 检查 ESLint 配置是否正确
+- 确保代码符合小程序规范
 
-### Q: 扩展推荐安装失败？
-确保 Cursor 已连接到互联网，可以手动搜索安装以下关键扩展：
-- `minapp-vscode`: 微信小程序开发支持
-- `prettier-vscode`: 代码格式化
-- `vscode-less`: Less 语法支持
+### 3. 调试问题
+- 清除微信开发者工具缓存
+- 检查真机网络环境
+- 确认 AppID 和权限配置
 
-## 技术栈
-
-- **框架**: 微信小程序原生框架
-- **语言**: TypeScript/JavaScript
-- **样式**: Less/WXSS
-- **构建**: 微信开发者工具 + npm
-- **代码质量**: ESLint + Prettier
-- **云服务**: 微信云开发
-- **IDE**: Cursor (主要) + 微信开发者工具
-
-## 参考资源
+## 扩展资源
 
 - [微信小程序官方文档](https://developers.weixin.qq.com/miniprogram/dev/framework/)
-- [云开发文档](https://developers.weixin.qq.com/miniprogram/dev/wxcloud/basis/getting-started.html)
-- [Cursor 官网](https://cursor.sh/)
+- [小程序云开发指南](https://developers.weixin.qq.com/miniprogram/dev/cloud/)
+- [JavaScript 现代语法指南](https://es6.ruanyifeng.com/)
+- [ESLint 配置指南](https://eslint.org/docs/user-guide/configuring)
 
 ---
 

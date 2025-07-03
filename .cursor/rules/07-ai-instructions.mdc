@@ -26,87 +26,227 @@ alwaysApply: true
 
 ## 代码生成要求
 
-### 小程序优先
-- **所有新代码必须符合微信小程序规范**
-- **严格遵循**: 避免使用小程序不支持的ES6+特性
-- **页面结构**: 每个页面必须包含.js/.json/.wxml/.wxss四个文件
+### Taro + React + TypeScript 优先
+- **所有新代码必须符合Taro + React规范**
+- **严格遵循**: 使用TypeScript语法，确保类型安全
+- **页面结构**: 每个页面包含.tsx/.config.ts/.scss三个文件，在src/目录下开发
 
 ### 组件开发规范
-```javascript
-// ✅ 推荐的页面结构
-Page({
-  data: {
-    message: 'Hello World'
-  },
-  onLoad() {
+```tsx
+// ✅ 推荐的React函数组件结构
+import { useState, useEffect } from 'react'
+import { View, Text, Button } from '@tarojs/components'
+import Taro from '@tarojs/taro'
+import './index.scss'
+
+interface PageProps {}
+
+export default function ExamplePage(props: PageProps) {
+  const [message, setMessage] = useState('Hello Taro + React')
+
+  useEffect(() => {
     // 页面加载时执行
-  },
-  handleTap() {
+    console.log('页面加载完成')
+  }, [])
+
+  const handleClick = () => {
     // 事件处理函数
-    this.setData({
-      message: '点击了按钮'
-    })
+    setMessage('点击了按钮')
   }
-})
+
+  return (
+    <View className="container">
+      <Text>{message}</Text>
+      <Button onClick={handleClick}>点击按钮</Button>
+    </View>
+  )
+}
 ```
 
 ### 文件结构规范
-```javascript
-// 1. 小程序原生API
-const app = getApp()
+```typescript
+// src/pages/example/index.tsx
 
-// 2. 第三方库(如有)
-// const utils = require('../../utils/util')
+// 1. React相关导入
+import { useState, useEffect, useCallback } from 'react'
+
+// 2. Taro组件和API导入
+import { View, Text, Button } from '@tarojs/components'
+import Taro from '@tarojs/taro'
 
 // 3. 项目内部工具
-const { request } = require('../../utils/request')
-const config = require('../../config/env')
+import { request } from '@/utils/request'
+import storage from '@/utils/storage'
+import { useGlobalStore } from '@/utils/store'
+
+// 4. 类型定义
+import type { User } from '@/types/user'
+
+// 5. 样式导入
+import './index.scss'
 ```
 
 ## 功能实现要求
 
-### 数据处理
-- **必须使用**: `setData()` 更新页面数据
-- **数据绑定**: 在WXML中使用`{{}}`进行数据绑定
-- **事件处理**: 使用`bind`或`catch`绑定事件
+### 状态管理
+- **必须使用**: React Hooks (useState, useEffect, useCallback, useMemo)
+- **数据更新**: 通过setState更新状态，避免直接修改状态对象
+- **类型安全**: 为所有状态定义TypeScript类型
 
 ### 网络请求
-- **统一封装**: 使用 `utils/request.js` 中的封装方法
+- **统一封装**: 使用 `src/utils/request.ts` 中的封装方法
 - **错误处理**: 完整的错误处理和用户提示
-- **加载状态**: 适当的loading状态显示
+- **加载状态**: 使用useState管理loading状态
+
+```typescript
+// 推荐的API调用方式
+const [loading, setLoading] = useState(false)
+
+const fetchData = async () => {
+  try {
+    setLoading(true)
+    const response = await request.get('/api/users')
+    setUsers(response.data)
+  } catch (error) {
+    console.error('获取数据失败:', error)
+    Taro.showToast({ title: '获取数据失败', icon: 'error' })
+  } finally {
+    setLoading(false)
+  }
+}
+```
 
 ### 本地存储
-- **同步方法**: 优先使用 `wx.getStorageSync/wx.setStorageSync`
-- **异步方法**: 复杂场景使用 `wx.getStorage/wx.setStorage`
-- **数据清理**: 及时清理无用的本地数据
+- **Taro API**: 使用 `Taro.getStorageSync/Taro.setStorageSync`
+- **工具封装**: 优先使用 `src/utils/storage.ts` 中的封装方法
+- **类型安全**: 为存储的数据定义类型
+
+```typescript
+// 推荐的存储使用方式
+import storage from '@/utils/storage'
+
+// 存储用户信息
+storage.set('userInfo', { name: '张三', id: '123' })
+
+// 获取用户信息
+const userInfo = storage.get<User>('userInfo')
+```
 
 ## 代码质量要求
 
+### TypeScript规范
+- **类型定义**: 为所有Props、State、API响应定义接口
+- **严格模式**: 启用strict模式，确保类型安全
+- **泛型使用**: 合理使用泛型提高代码复用性
+
+```typescript
+// 组件Props接口
+interface UserCardProps {
+  user: User
+  onSelect?: (user: User) => void
+}
+
+// API响应接口
+interface ApiResponse<T> {
+  code: number
+  message: string
+  data: T
+}
+```
+
 ### 注释规范
 - **复杂逻辑**: 必须添加中文注释说明
-- **公共函数**: 使用 JSDoc 格式
-- **页面说明**: 每个页面顶部添加功能说明注释
+- **公共函数**: 使用 JSDoc 格式，包含类型信息
+- **组件说明**: 每个组件顶部添加功能说明注释
+
+```typescript
+/**
+ * 用户卡片组件
+ * @param user 用户信息对象
+ * @param onSelect 用户选择回调函数
+ */
+const UserCard: React.FC<UserCardProps> = ({ user, onSelect }) => {
+  // 组件实现
+}
+```
 
 ### 性能优化
-- **setData优化**: 避免频繁调用和传递大对象
-- **图片优化**: 合理的图片格式和大小
-- **分包加载**: 大型项目合理使用分包
+- **React Hooks优化**: 合理使用useMemo和useCallback避免不必要的重渲染
+- **图片优化**: 合理的图片格式和大小，支持懒加载
+- **代码分割**: 使用Taro的分包配置，按页面和功能模块分割代码
+
+```tsx
+// Hook优化示例
+const Component = () => {
+  const [data, setData] = useState<User[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // 缓存过滤结果
+  const filteredData = useMemo(() => {
+    return data.filter(user => user.name.includes(searchTerm))
+  }, [data, searchTerm])
+
+  // 缓存回调函数
+  const handleSelect = useCallback((user: User) => {
+    console.log('选择用户:', user.name)
+  }, [])
+
+  return (
+    <View>
+      {filteredData.map(user => (
+        <UserCard key={user.id} user={user} onSelect={handleSelect} />
+      ))}
+    </View>
+  )
+}
+```
 
 ### 错误处理
 - **用户友好**: 所有错误都要有用户友好的提示
 - **开发调试**: 开发环境下保留详细错误信息
-- **统一处理**: 使用错误处理工具类
+- **统一处理**: 使用错误处理工具类和TypeScript类型保护
 
-## 测试要求
+```typescript
+// 错误处理示例
+try {
+  const result = await api.fetchData()
+  if (result.code !== 200) {
+    throw new Error(result.message)
+  }
+  return result.data
+} catch (error) {
+  if (error instanceof Error) {
+    console.error('API调用失败:', error.message)
+    Taro.showToast({ title: error.message, icon: 'error' })
+  }
+  throw error
+}
+```
+
+## 开发流程要求
+
+### 编译构建
+- **开发命令**: 使用 `NODE_OPTIONS="--openssl-legacy-provider" pnpm run dev:weapp`
+- **生产构建**: 使用 `NODE_OPTIONS="--openssl-legacy-provider" pnpm run build:weapp`
+- **实时编译**: 开发模式下自动编译到miniprogram目录
+
+### 文件创建规范
+1. **页面创建**: 在 `src/pages/` 下创建页面目录
+2. **组件创建**: 在 `src/components/` 下创建组件目录
+3. **工具函数**: 在 `src/utils/` 下创建工具文件
+4. **类型定义**: 在 `src/types/` 下创建类型文件
+
+### 测试要求
 
 每个新功能都应包含：
 - **功能测试**: 核心功能的正确性验证
-- **兼容性测试**: 不同机型和微信版本的兼容性
+- **类型检查**: TypeScript编译通过，无类型错误
+- **多端兼容**: 小程序和H5平台的兼容性测试
 - **性能测试**: 页面加载速度和操作响应
 
 ## 文档更新
 
 代码变更时同步更新：
-- **README.md**: 新功能说明
-- **开发文档**: 重要功能的使用说明
+- **README.md**: 新功能说明和使用方法
+- **类型文档**: 重要接口和类型的说明
 - **配置说明**: 新增配置项的详细说明

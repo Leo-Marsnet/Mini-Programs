@@ -1,170 +1,345 @@
-# 微信小程序项目 - Cursor开发规则
+# Taro + React + TypeScript 项目开发规则
 
 ## ⚠️ 核心架构规则（必须严格遵守）
 
 ### 🏗️ 双目录架构
-本项目采用**关注点分离**架构：
-- **主目录** (YOUR-PROJECT-NAME): Cursor开发环境、项目管理、测试
-- **小程序目录** (miniprogram/): 微信小程序源代码
+本项目采用**Taro + React + TypeScript**跨端开发框架：
+- **主目录**: Cursor开发环境，源代码在 `src/` 目录
+- **miniprogram目录**: 编译输出目录，供微信开发者工具使用
 
-### 🎯 绝对规则：所有小程序开发都在 miniprogram/ 目录下
+### 🎯 绝对规则：所有开发都在 src/ 目录下
 
-当用户要求开发小程序功能时，**必须**在 `miniprogram/` 目录下操作：
+当用户要求开发功能时，**必须**在 `src/` 目录下操作：
 
 ✅ **正确操作：**
 ```
-miniprogram/pages/profile/profile.js        # 创建页面
-miniprogram/components/user-card/index.js   # 创建组件
-miniprogram/utils/helpers.js                # 创建工具函数
-miniprogram/config/env.js                   # 修改配置
-miniprogram/assets/images/icon.png          # 添加静态资源
-miniprogram/cloud/functions/login/index.js  # 云函数
+src/pages/profile/index.tsx         # 创建页面
+src/components/user-card/index.tsx  # 创建组件
+src/utils/request.ts                # 创建工具函数
+src/config/index.ts                 # 修改配置
+src/assets/images/icon.png          # 添加静态资源
 ```
 
 ❌ **禁止操作：**
 ```
-pages/profile/profile.js        # ❌ 不要在主目录创建页面
-components/user-card/index.js   # ❌ 不要在主目录创建组件
-utils/helpers.js                # ❌ 不要在主目录创建工具函数
+miniprogram/pages/profile/index.tsx  # ❌ miniprogram是编译输出目录
+pages/profile/index.tsx              # ❌ 不要在根目录创建页面
+components/user-card/index.tsx       # ❌ 不要在根目录创建组件
 ```
 
-### 📝 文件创建前检查清单
-1. ✅ 路径以 `miniprogram/` 开头
-2. ✅ 符合微信小程序文件结构
-3. ✅ 页面已在 `miniprogram/app.json` 中注册
-4. ✅ 组件已正确引用
+### 📝 开发前检查清单
+1. ✅ 所有源码文件在 `src/` 目录下
+2. ✅ 页面使用 `.tsx` 扩展名（TypeScript + JSX）
+3. ✅ 组件使用 React Functional Components + Hooks
+4. ✅ 页面已在 `src/app.config.ts` 中注册
+5. ✅ 使用 Taro 3.x API 规范
 
-## 🛠️ 微信小程序开发规范
+## 🛠️ Taro + React 开发规范
+
+### 项目结构
+```
+src/
+├── app.tsx              # 应用入口文件
+├── app.config.ts        # 全局配置文件
+├── app.scss            # 全局样式文件
+├── pages/              # 页面目录
+│   └── index/
+│       ├── index.tsx   # 页面组件
+│       ├── index.config.ts  # 页面配置
+│       └── index.scss  # 页面样式
+├── components/         # 公共组件
+├── utils/             # 工具函数
+│   ├── auth.ts        # 认证工具
+│   ├── loading.ts     # 加载工具
+│   ├── request.ts     # 网络请求
+│   └── storage.ts     # 存储工具
+├── store/             # 状态管理
+├── assets/            # 静态资源
+└── types/             # TypeScript类型定义
+```
 
 ### 页面开发标准
-每个页面必须包含4个文件：
-```
-miniprogram/pages/example/
-├── example.js    # 页面逻辑
-├── example.json  # 页面配置
-├── example.wxml  # 页面结构
-└── example.wxss  # 页面样式
+```tsx
+// src/pages/example/index.tsx
+import { useState, useEffect } from 'react'
+import { View, Text, Button } from '@tarojs/components'
+import Taro from '@tarojs/taro'
+import './index.scss'
+
+export default function Example() {
+  const [data, setData] = useState<any>(null)
+
+  useEffect(() => {
+    // 页面加载时执行
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    // 数据加载逻辑
+  }
+
+  const handleClick = () => {
+    console.log('按钮点击')
+  }
+
+  return (
+    <View className="container">
+      <Text>Hello Taro + React</Text>
+      <Button onClick={handleClick}>点击按钮</Button>
+    </View>
+  )
+}
 ```
 
 ### 组件开发标准
-每个组件必须包含4个文件：
+```tsx
+// src/components/user-card/index.tsx
+import { View, Text, Image } from '@tarojs/components'
+import './index.scss'
+
+interface UserCardProps {
+  user: {
+    name: string
+    avatar: string
+  }
+  onTap?: () => void
+}
+
+export default function UserCard({ user, onTap }: UserCardProps) {
+  return (
+    <View className="user-card" onClick={onTap}>
+      <Image src={user.avatar} className="avatar" />
+      <Text className="name">{user.name}</Text>
+    </View>
+  )
+}
 ```
-miniprogram/components/user-card/
-├── index.js    # 组件逻辑
-├── index.json  # 组件配置
-├── index.wxml  # 组件结构
-└── index.wxss  # 组件样式
+
+### 配置文件规范
+```typescript
+// src/pages/example/index.config.ts
+import { PageConfig } from '@tarojs/taro'
+
+const config: PageConfig = {
+  navigationBarTitleText: '示例页面',
+  enablePullDownRefresh: true,
+  backgroundColor: '#f5f5f5'
+}
+
+export default config
 ```
-
-### 代码风格要求
-- **命名约定**: 使用小驼峰命名法
-- **文件命名**: 使用kebab-case (短横线分隔)
-- **缩进**: 2个空格
-- **引号**: 单引号优先
-- **分号**: 语句结尾必须加分号
-
-### 小程序特有规范
-- 使用 `Page()` 构造页面
-- 使用 `Component()` 构造组件
-- 数据更新必须使用 `setData()`
-- 事件绑定使用 `bind:` 或 `catch:`
-- 样式单位优先使用 `rpx`
-
-## 📦 工具类使用指南
-
-项目内置工具类位于 `miniprogram/utils/`：
-- `request.js` - 网络请求封装
-- `storage.js` - 本地存储管理
-- `wx-utils.js` - 微信API封装
-- `format.js` - 数据格式化
-- `store.js` - 全局状态管理
-- `errorHandler.js` - 错误处理
 
 ## 🔧 开发工作流
 
+### 构建命令
+```bash
+# 微信小程序开发（需要设置Node环境变量）
+NODE_OPTIONS="--openssl-legacy-provider" pnpm run dev:weapp
+
+# 微信小程序构建
+NODE_OPTIONS="--openssl-legacy-provider" pnpm run build:weapp
+
+# H5开发
+pnpm run dev:h5
+
+# H5构建
+pnpm run build:h5
+```
+
 ### 创建新页面
-1. 在 `miniprogram/pages/` 下创建页面目录
-2. 创建4个必需文件 (.js/.json/.wxml/.wxss)
-3. 在 `miniprogram/app.json` 中注册页面路径
-4. 编写页面逻辑和模板
+1. 在 `src/pages/` 下创建页面目录
+2. 创建 `index.tsx` (页面组件)
+3. 创建 `index.config.ts` (页面配置)
+4. 创建 `index.scss` (页面样式)
+5. 在 `src/app.config.ts` 中注册页面路径
 
 ### 创建新组件
-1. 在 `miniprogram/components/` 下创建组件目录
-2. 创建4个必需文件，index.json设置 `"component": true`
-3. 在需要使用的页面json中引入组件
-4. 在wxml中使用组件标签
+1. 在 `src/components/` 下创建组件目录
+2. 创建 `index.tsx` (组件代码)
+3. 创建 `index.scss` (组件样式)
+4. 导出组件供其他页面使用
+
+## 🎨 样式开发规范
+
+### 响应式单位
+```scss
+// 使用 Taro 的尺寸转换
+.container {
+  width: 750px;        // 自动转换为 rpx
+  padding: 20px;       // 自动转换为 rpx
+  font-size: 32px;     // 自动转换为 rpx
+}
+```
+
+### SCSS 语法
+```scss
+// 变量定义
+$primary-color: #07c160;
+$border-radius: 8px;
+
+// 嵌套语法
+.user-card {
+  background: white;
+  border-radius: $border-radius;
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+  }
+
+  .name {
+    color: $primary-color;
+    font-weight: bold;
+  }
+}
+```
+
+## 📦 工具函数使用
 
 ### 网络请求
-```javascript
-const { request } = require('../utils/request')
+```typescript
+// src/utils/request.ts
+import { request } from '@/utils/request'
 
-// 使用封装的请求方法
-const data = await request.get('/api/users')
-const result = await request.post('/api/login', { username, password })
+// GET请求
+const userData = await request.get('/api/user')
+
+// POST请求
+const result = await request.post('/api/login', {
+  username: 'admin',
+  password: '123456'
+})
 ```
 
 ### 本地存储
-```javascript
-const storage = require('../utils/storage')
+```typescript
+// src/utils/storage.ts
+import storage from '@/utils/storage'
 
-// 基础存储
-storage.set('key', 'value')
-const value = storage.get('key')
+// 存储数据
+storage.set('userInfo', { name: '张三', age: 25 })
+
+// 获取数据
+const userInfo = storage.get('userInfo')
 
 // 带过期时间的存储
-storage.setWithExpiry('key', data, 24 * 60 * 60 * 1000) // 24小时过期
+storage.setWithExpiry('token', 'abc123', 24 * 60 * 60 * 1000) // 24小时过期
 ```
 
-## 🎨 UI开发规范
+### 全局状态管理
+```typescript
+// src/utils/store.ts
+import { useGlobalStore } from '@/utils/store'
 
-### 样式组织
-- 全局样式：`miniprogram/app.wxss`
-- 页面样式：各页面的 `.wxss` 文件
-- 组件样式：各组件的 `.wxss` 文件
+const Component = () => {
+  const { user, setUser } = useGlobalStore()
 
-### 响应式设计
-- 使用 `rpx` 单位适配不同屏幕
-- 合理使用 Flexbox 布局
-- 考虑安全区域适配
-
-### 微信设计规范
-- 遵循微信小程序设计指南
-- 使用微信提供的标准组件
-- 保持界面简洁直观
-
-## 📱 调试和测试
-
-### 开发环境
-- 用Cursor编辑代码（主目录）
-- 用微信开发者工具调试（miniprogram目录）
-- 两个工具分离使用，避免冲突
-
-### 测试要求
-- 功能测试：核心功能正确性
-- 兼容性测试：不同机型和版本
-- 性能测试：页面加载和响应速度
+  return (
+    <View>
+      <Text>用户名: {user?.name}</Text>
+    </View>
+  )
+}
+```
 
 ## 🚀 性能优化
 
-### 代码层面
-- 避免频繁调用 `setData()`
-- 合理使用分包加载
-- 图片资源优化
+### React Hooks优化
+```tsx
+import { useMemo, useCallback } from 'react'
 
-### 用户体验
-- 提供加载状态反馈
-- 合理的错误提示
-- 流畅的页面切换动画
+const Component = () => {
+  // 缓存计算结果
+  const expensiveValue = useMemo(() => {
+    return heavyCalculation(data)
+  }, [data])
 
-## ⏱️ 任务执行监控
+  // 缓存函数引用
+  const handleClick = useCallback(() => {
+    console.log('点击处理')
+  }, [])
 
-**重要**：所有AI任务执行必须遵循 `.cursor/rules/08-task-monitoring.mdc` 中定义的监控规则：
+  return <View onClick={handleClick}>{expensiveValue}</View>
+}
+```
 
-- 🔍 **40秒规则**：任务超过40秒无进展时强制状态检查
-- 💬 **及时反馈**：20秒提供进度，40秒解决问题，60秒提供选择
-- 🚫 **例外情况**：用户确认类操作不受时间限制
-- ✅ **优先级**：用户体验 > 完美结果
+### 代码分割
+- 使用 Taro 的分包配置
+- 懒加载非核心组件
+- 按页面和功能模块分割代码
+
+## 📱 多端适配
+
+### 平台差异处理
+```typescript
+import Taro from '@tarojs/taro'
+
+// 获取当前平台
+const platform = Taro.getEnv()
+
+if (platform === Taro.ENV_TYPE.WEAPP) {
+  // 微信小程序特有逻辑
+} else if (platform === Taro.ENV_TYPE.H5) {
+  // H5特有逻辑
+}
+```
+
+### 条件编译
+```typescript
+// 使用 Taro 的条件编译
+if (process.env.TARO_ENV === 'weapp') {
+  // 微信小程序代码
+}
+if (process.env.TARO_ENV === 'h5') {
+  // H5代码
+}
+```
+
+## 🔍 TypeScript规范
+
+### 类型定义
+```typescript
+// src/types/user.ts
+export interface User {
+  id: string
+  name: string
+  avatar: string
+  createdAt: Date
+}
+
+export interface ApiResponse<T> {
+  code: number
+  message: string
+  data: T
+}
+```
+
+### 组件Props类型
+```tsx
+interface ComponentProps {
+  title: string
+  count?: number
+  onSubmit: (data: any) => void
+}
+
+const Component: React.FC<ComponentProps> = ({ title, count = 0, onSubmit }) => {
+  // 组件实现
+}
+```
+
+## 🧪 开发测试
+
+### 调试流程
+1. **主目录开发**: 在 Cursor 中编辑 `src/` 下的源码
+2. **实时编译**: 运行 `pnpm run dev:weapp` 自动编译到 `miniprogram/`
+3. **微信调试**: 微信开发者工具打开 `miniprogram/` 目录进行调试
+
+### 错误处理
+- 查看 Taro 编译错误信息
+- 使用 TypeScript 类型检查
+- 在微信开发者工具中查看运行时错误
 
 ---
 
-**🔍 记住：查看 `.cursor/docs/project-architecture.md` 获取完整架构指南**
+**🎯 记住：使用 Taro + React + TypeScript 开发，源码在 `src/` 目录，`miniprogram/` 是编译输出目录**

@@ -33,10 +33,7 @@
     "minifyWXSS": true,
     "disableUseStrict": false,
     "showES6CompileOption": false,
-    "useCompilerPlugins": [
-      "typescript",
-      "less"
-    ],
+    "useCompilerPlugins": [],
     "ignoreDevUnusedFiles": false,
     "ignoreUploadUnusedFiles": false,
     "minifyWXML": true,

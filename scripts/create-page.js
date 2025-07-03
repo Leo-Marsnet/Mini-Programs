@@ -6,7 +6,7 @@ const readline = require('readline');
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 console.log('📄 小程序页面创建工具');
@@ -163,9 +163,9 @@ Page({
 
     // 创建 .json 文件
     const jsonContent = {
-      "navigationBarTitleText": pageTitle || pageName,
-      "enablePullDownRefresh": false,
-      "usingComponents": {}
+      'navigationBarTitleText': pageTitle || pageName,
+      'enablePullDownRefresh': false,
+      'usingComponents': {},
     };
 
     // 写入文件
@@ -187,14 +187,14 @@ Page({
       }
     }
 
-    console.log(`\n🎉 页面创建成功！`);
+    console.log('\n🎉 页面创建成功！');
     console.log(`📁 创建位置: miniprogram/pages/${pageName}/`);
-    console.log(`📄 包含文件:`);
+    console.log('📄 包含文件:');
     console.log(`   - ${pageName}.js    (页面逻辑)`);
     console.log(`   - ${pageName}.wxml  (页面结构)`);
     console.log(`   - ${pageName}.wxss  (页面样式)`);
     console.log(`   - ${pageName}.json  (页面配置)`);
-    console.log(`\n🚀 现在可以在微信开发者工具中预览新页面了！`);
+    console.log('\n🚀 现在可以在微信开发者工具中预览新页面了！');
 
   } catch (error) {
     console.error('❌ 创建页面失败:', error.message);

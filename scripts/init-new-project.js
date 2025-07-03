@@ -6,7 +6,7 @@ const readline = require('readline');
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 console.log('🚀 微信小程序项目初始化工具');
@@ -42,11 +42,11 @@ async function initProject() {
       if (gitUrl) {
         packageJson.repository = {
           type: 'git',
-          url: gitUrl
+          url: gitUrl,
         };
         packageJson.homepage = gitUrl.replace('.git', '#readme');
         packageJson.bugs = {
-          url: gitUrl.replace('.git', '/issues')
+          url: gitUrl.replace('.git', '/issues'),
         };
       }
 
@@ -109,7 +109,7 @@ function updateCursorDocs(projectName, gitUrl) {
     'template.cursorrules',
     'README.md',
     'DEVELOPMENT.md',
-    '.cursorrules'
+    '.cursorrules',
   ];
 
   cursorFiles.forEach(filePath => {
@@ -117,7 +117,7 @@ function updateCursorDocs(projectName, gitUrl) {
     if (fs.existsSync(fullPath)) {
       let content = fs.readFileSync(fullPath, 'utf8');
 
-            // 替换所有项目名占位符
+      // 替换所有项目名占位符
       content = content.replace(/YOUR-PROJECT-NAME/g, projectName);
       content = content.replace(/<your-project-name>/g, projectName);
       content = content.replace(/your-project-name/g, projectName);
@@ -170,7 +170,7 @@ function createBasicPageStructure() {
 
       // 创建 .json 文件
       const jsonContent = {
-        "navigationBarTitleText": pageName.charAt(0).toUpperCase() + pageName.slice(1)
+        'navigationBarTitleText': pageName.charAt(0).toUpperCase() + pageName.slice(1),
       };
       fs.writeFileSync(path.join(pageDir, `${pageName}.json`), JSON.stringify(jsonContent, null, 2));
     }

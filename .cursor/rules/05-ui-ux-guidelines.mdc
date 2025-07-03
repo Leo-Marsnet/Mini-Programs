@@ -57,9 +57,9 @@ alwaysApply: true
     - 错误提示使用红色文字
 
 ### 反馈机制
-*   **Toast**: 使用 `wx.showToast` 显示操作结果
-*   **Loading**: 使用 `wx.showLoading` 显示加载状态
-*   **Modal**: 重要确认使用 `wx.showModal`
+*   **Toast**: 使用 `Taro.showToast` 显示操作结果
+*   **Loading**: 使用 `Taro.showLoading` 显示加载状态
+*   **Modal**: 重要确认使用 `Taro.showModal`
 
 ## 适配规范
 

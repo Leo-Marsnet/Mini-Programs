@@ -6,42 +6,265 @@ Your main goal is to guide the user in setting up and developing the project. Wh
 
 ---
 
-## ⚠️ CRITICAL: Project Architecture Rule (Must Read First!)
+# Taro + React 多端开发项目规则
 
-**🏗️ DUAL DIRECTORY ARCHITECTURE**
+## ⚠️ 核心架构规则（必须严格遵守）
 
-This project uses a **separation of concerns** architecture with two distinct directories:
+### 🏗️ 技术栈选择
+本项目采用**Taro + React**跨端开发框架：
+- **框架**: Taro 3.x + React 18
+- **语言**: JavaScript/TypeScript
+- **构建工具**: Webpack 5
+- **样式**: SCSS + 原子化CSS
+- **目标平台**: 微信小程序 + H5 + APP（React Native）
 
-- **Main Directory** (YOUR-PROJECT-NAME): For Cursor development environment, project management, testing, scripts
-- **Miniprogram Directory** (miniprogram/): For WeChat MiniProgram source code
+### 🎯 绝对规则：所有开发都在 src/ 目录下
 
-### 🎯 ABSOLUTE RULE: All MiniProgram Development in miniprogram/ Directory
+当用户要求开发功能时，**必须**在 `src/` 目录下操作：
 
-When the user requests any MiniProgram functionality, you MUST operate within the `miniprogram/` directory:
+✅ **正确操作：**
+```
+src/pages/profile/index.jsx         # 创建页面
+src/components/user-card/index.jsx  # 创建组件
+src/utils/request.js                # 创建工具函数
+src/config/index.js                 # 修改配置
+src/assets/images/icon.png          # 添加静态资源
+```
 
-✅ **CORRECT Operations:**
-- Create pages: `miniprogram/pages/profile/profile.js`
-- Create components: `miniprogram/components/user-card/index.js`
-- Create utils: `miniprogram/utils/helpers.js`
-- Modify config: `miniprogram/config/env.js`
-- Add assets: `miniprogram/assets/images/icon.png`
-- Cloud functions: `miniprogram/cloud/functions/login/index.js`
+❌ **禁止操作：**
+```
+miniprogram/pages/profile/index.jsx  # ❌ miniprogram是编译输出目录
+components/user-card/index.jsx       # ❌ 不要在根目录创建组件
+utils/request.js                     # ❌ 不要在根目录创建工具
+```
 
-❌ **FORBIDDEN Operations:**
-- Creating pages in main directory: `pages/profile/profile.js` ❌
-- Creating components in main directory: `components/user-card/index.js` ❌
-- Creating utils in main directory: `utils/helpers.js` ❌
+### 📝 开发前检查清单
+1. ✅ 所有源码文件在 `src/` 目录下
+2. ✅ 页面使用 `.jsx` 扩展名
+3. ✅ 组件使用 React Functional Components + Hooks
+4. ✅ 页面已在 `src/app.config.js` 中注册
+5. ✅ 使用 Taro 3.x API 规范
 
-### 📝 File Path Validation
+## 🛠️ Taro + React 开发规范
 
-Before creating ANY MiniProgram file, verify:
-1. ✅ Path starts with `miniprogram/`
-2. ✅ File follows WeChat MiniProgram structure
-3. ✅ Pages are registered in `miniprogram/app.json`
-4. ✅ Components are properly referenced
+### 项目结构
+```
+src/
+├── app.js              # 应用入口文件
+├── app.config.js       # 全局配置文件
+├── app.scss           # 全局样式文件
+├── pages/             # 页面目录
+│   └── index/
+│       ├── index.jsx  # 页面组件
+│       ├── index.config.js  # 页面配置
+│       └── index.scss # 页面样式
+├── components/        # 公共组件
+├── utils/            # 工具函数
+├── store/            # 状态管理
+├── services/         # API服务
+├── assets/           # 静态资源
+└── constants/        # 常量定义
+```
 
-**🔍 Quick Architecture Check:**
-Read `.cursor/docs/project-architecture.md` for complete architecture guidelines.
+### 页面开发标准
+```jsx
+// src/pages/example/index.jsx
+import { useState, useEffect } from 'react'
+import { View, Text, Button } from '@tarojs/components'
+import Taro from '@tarojs/taro'
+import './index.scss'
+
+export default function Example() {
+  const [data, setData] = useState(null)
+
+  useEffect(() => {
+    // 页面加载时执行
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    // 数据加载逻辑
+  }
+
+  return (
+    <View className="container">
+      <Text>Hello Taro + React</Text>
+    </View>
+  )
+}
+```
+
+### 组件开发标准
+```jsx
+// src/components/user-card/index.jsx
+import { View, Text, Image } from '@tarojs/components'
+import './index.scss'
+
+export default function UserCard({ user, onTap }) {
+  return (
+    <View className="user-card" onClick={onTap}>
+      <Image src={user.avatar} className="avatar" />
+      <Text className="name">{user.name}</Text>
+    </View>
+  )
+}
+```
+
+### 配置文件规范
+```javascript
+// src/pages/example/index.config.js
+export default {
+  navigationBarTitleText: '示例页面',
+  enablePullDownRefresh: true,
+  backgroundColor: '#f5f5f5'
+}
+```
+
+## 🔧 开发工具分工
+
+### Cursor (主要开发工具)
+- 代码编辑和项目管理
+- 运行 Taro 构建命令
+- 版本控制操作
+- 文档编写
+
+### 微信开发者工具
+- 小程序调试和预览
+- 真机测试
+- 代码上传发布
+
+### 构建命令
+```bash
+# 微信小程序开发
+npm run dev:weapp
+
+# H5开发
+npm run dev:h5
+
+# 构建生产版本
+npm run build:weapp
+npm run build:h5
+```
+
+## 🎨 样式开发规范
+
+### 响应式单位
+```scss
+// 使用 Taro 的尺寸转换
+.container {
+  width: 750px;        // 自动转换为 rpx
+  padding: 20px;       // 自动转换为 rpx
+  font-size: 32px;     // 自动转换为 rpx
+}
+```
+
+### 原子化CSS类
+```scss
+// 间距类
+.p-10 { padding: 10px; }
+.m-20 { margin: 20px; }
+
+// 文字类
+.text-center { text-align: center; }
+.text-bold { font-weight: bold; }
+
+// 布局类
+.flex { display: flex; }
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+```
+
+## 🚀 性能优化
+
+### 代码分割
+- 使用 Taro 的分包配置
+- 按页面和功能模块分割代码
+- 懒加载非核心功能
+
+### 图片优化
+- 使用 WebP 格式
+- 实现图片懒加载
+- 压缩图片资源
+
+### 网络优化
+- 统一的请求拦截器
+- 请求去重和缓存
+- 错误重试机制
+
+## 📱 多端适配
+
+### 平台差异处理
+```javascript
+import Taro from '@tarojs/taro'
+
+// 获取当前平台
+const platform = Taro.getEnv()
+
+if (platform === Taro.ENV_TYPE.WEAPP) {
+  // 微信小程序特有逻辑
+} else if (platform === Taro.ENV_TYPE.H5) {
+  // H5特有逻辑
+} else if (platform === Taro.ENV_TYPE.RN) {
+  // React Native特有逻辑
+}
+```
+
+### 条件编译
+```javascript
+// 使用 Taro 的条件编译
+if (process.env.TARO_ENV === 'weapp') {
+  // 微信小程序代码
+}
+if (process.env.TARO_ENV === 'h5') {
+  // H5代码
+}
+```
+
+## 🔐 状态管理
+
+### 全局状态
+```javascript
+// src/store/index.js
+import { createStore } from 'zustand'
+
+export const useAppStore = createStore((set) => ({
+  user: null,
+  setUser: (user) => set({ user }),
+  clearUser: () => set({ user: null })
+}))
+```
+
+### 本地存储
+```javascript
+// src/utils/storage.js
+import Taro from '@tarojs/taro'
+
+export const storage = {
+  get: (key) => Taro.getStorageSync(key),
+  set: (key, value) => Taro.setStorageSync(key, value),
+  remove: (key) => Taro.removeStorageSync(key),
+  clear: () => Taro.clearStorageSync()
+}
+```
+
+## 🧪 测试策略
+
+### 单元测试
+- 使用 Jest 进行单元测试
+- 测试工具函数和组件
+- 保证核心逻辑的正确性
+
+### 集成测试
+- 测试页面间的跳转
+- 测试数据流的完整性
+- 测试多端兼容性
+
+---
+
+**🎯 记住：使用 Taro + React 开发，源码在 `src/` 目录，`miniprogram/` 是编译输出目录**
 
 ---
 

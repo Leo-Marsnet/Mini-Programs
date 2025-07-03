@@ -1,6 +1,7 @@
 {
-  "description": "微信小程序项目配置文件",
-  "cloudfunctionRoot": "cloud/functions/",
+  "description": "微信小程序项目配置（Cursor开发环境）",
+  "miniprogramRoot": "./",
+  "cloudfunctionRoot": "miniprogram/cloud/functions/",
   "setting": {
     "urlCheck": true,
     "es6": true,
@@ -32,10 +33,7 @@
     "minifyWXSS": true,
     "disableUseStrict": false,
     "showES6CompileOption": false,
-    "useCompilerPlugins": [
-      "typescript",
-      "less"
-    ],
+    "useCompilerPlugins": [],
     "ignoreDevUnusedFiles": false,
     "ignoreUploadUnusedFiles": false,
     "minifyWXML": true,
@@ -56,7 +54,14 @@
     "tabSize": 2
   },
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      "test/**/*",
+      "scripts/**/*",
+      ".cursor/**/*",
+      ".vscode/**/*",
+      "*.md",
+      "jest.config.js"
+    ],
     "include": []
   },
   "appid": "wxb5c8100857b47542",
