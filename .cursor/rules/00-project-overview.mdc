@@ -26,7 +26,7 @@ alwaysApply: true
 ## 项目结构
 
 ```
-Mini-Programs/                    # 主项目目录 (Cursor开发环境)
+YourProject/                      # 主项目目录 (Cursor开发环境)
 ├── .cursor/                      # Cursor配置和文档
 ├── src/                          # 源代码目录 ⭐
 │   ├── app.tsx                   # 应用入口文件
